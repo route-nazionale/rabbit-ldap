@@ -1,0 +1,11 @@
+{
+    "require": {
+        "videlalvaro/php-amqplib": "2.4.*@dev",
+        "symfony/console": "2.3.*@dev"
+    },
+    "autoload": {
+        "psr-0": {
+            "Rn2014\\": "src/"
+        }
+    }
+}

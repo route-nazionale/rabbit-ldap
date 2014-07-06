@@ -1,0 +1,19 @@
+Setup
+====
+
+copiare il file config/params.dist.php in config/params.php e impostare i valori corretti
+
+
+Install Composer on Linux and Mac OS X
+
+    $ curl -sS https://getcomposer.org/installer | php
+    $ sudo mv composer.phar /usr/local/bin/composer
+
+lanciare:
+
+    composer install
+
+
+per utilizzare la console:
+
+    php console.php
