@@ -3,6 +3,9 @@
  * User: lancio
  * Date: 04/07/14
  * Time: 22:40
+ * @author Shawn Grover 2008
+ * @author Luca Lancioni
+ *
  */
 
 namespace Rn2014\Ldap;
