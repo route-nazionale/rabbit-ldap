@@ -16,6 +16,8 @@ class LdapRawCaller {
 
     private $connection;
     private $baseDn;
+    private $adminDn = false;
+    private $adminPassword = false;
 
     public function __construct($params)
     {
@@ -31,6 +33,16 @@ class LdapRawCaller {
         foreach($params["options"] as $option => $value) {
             ldap_set_option($this->connection, $option, $value);
         }
+
+        if (isset($params["admin"])) {
+            $this->adminDn = $params["admin"]["dn"];
+            $this->adminPassword = $params["admin"]["password"];
+        }
+    }
+
+    public function setPasswordEncrypter(PasswordEncrypter $encrypter)
+    {
+        $this->encrypter = $encrypter;
     }
 
     public function getDn($username)
@@ -46,14 +58,7 @@ class LdapRawCaller {
         return $dn;
     }
 
-//    public function isUserInGroup($group, $username)
-//    {
-//        $results = $this->manager->search("ou=Groups,".$this->baseDn, '(&(cn='.$group.')(memberUid='.$username.'))', true);
-//
-//        var_dump($results->next() );
-//    }
-
-    public function bindAnonimously()
+    public function bindAnonymously()
     {
         return ldap_bind($this->connection);
     }
@@ -65,140 +70,69 @@ class LdapRawCaller {
 
     public function bind($dn, $password)
     {
-        return ldap_bind($this->connection, $dn, $password);
+        return @ldap_bind($this->connection, $dn, $password);
     }
 
-    public function bindByUsername($username , $password)
+    public function bindAdmin()
     {
-        return @ldap_bind($this->connection, "uid=" . $username . ",ou=Users,dc=rn2014,dc=it", $password);
+        if (!$this->adminDn) {
+            throw new \Exception("admin account not configured");
+        }
+        return @ldap_bind($this->connection, $this->adminDn, $this->adminPassword);
     }
 
-    public function testPassword($username, $password)
+    public function testPassword($dn, $password)
     {
-        if (!$this->bindAnonimously()){
-            return;
+
+//    //        echo $dn;
+//            $attr = "userPassword";
+//
+//            // compare value
+//            $r = ldap_compare($this->connection, $dn, $attr, $password);
+//
+//            if ($r === -1) {
+//                $this->ldapError();
+//                return false;
+//            }
+//
+//            return $r;
+
+            $r = $this->bind($dn, $password);
+            return $r;
+
+    }
+
+    public function isUserInGroup($username, $group)
+    {
+        $filter = "(&(cn=$group)(memberUid=$username))";
+        $dnGroup = "ou=Groups," . $this->baseDn;
+        $result = $this->search($dnGroup, $filter);
+        $count = $result["count"];
+
+        if ($count > 0) {
+            return true;
         }
-        // prepare data
-        $dn = "uid=" . $username . ",ou=Users," . $this->baseDn;
-        $attr = "password";
 
-        // compare value
-        $r = ldap_compare($this->connection, $dn, $attr, $password);
-
-        if ($r === -1) {
-            $this->ldapError();
-            return false;
-        }
-
-        return $r;
+        return false;
     }
 
     /**
      * Search an LDAP server
      */
-    public function search($basedn, $filter, $attributes)
+    public function search($dn, $filter, $attributes = null)
     {
-        $results = ldap_search($this->connection, $basedn, $filter, $attributes);
-        if ($results)
-        {
+        if ($attributes) {
+            $results = ldap_search($this->connection, $dn, $filter, $attributes);
+        } else {
+            $results = ldap_search($this->connection, $dn, $filter);
+        }
+
+        if ($results) {
             $entries = ldap_get_entries($this->connection, $results);
             return $entries;
         }
-    }
 
-    /**
-     * Add a new contact
-     */
-    public function add($basedn, User $user)
-    {
-        //set up our entry array
-        $contact = array();
-        $contact['objecttype'][0] = 'top';
-        $contact['objectclass'][1] = 'person';
-        $contact['objectclass'][2] = 'organizationalPerson';
-        $contact['objectclass'][3] = 'contact';
-
-        //add our data
-        $contact['givenname'] = $user->getFirstname();
-        $contact['sn'] = $user->getLastname();
-        $contact['streetaddress'] = $user->getAddress();
-        $contact['telephonenumber'] = $user->getPhone();
-
-        //Create the CN entry
-        $cn = 'cn='. $user->getFirstname() .' '. $user->getLastname();
-
-        //create the DN for the entry
-        $dn = 'cn='. $contact['cn'] .','. $basedn;
-
-        //add the entry
-        $result = ldap_add($this->connection, $dn, $contact);
-        if (!result)
-        {
-            //the add failed, lets raise an error and hopefully find out why
-            $this->ldapError();
-        }
-    }
-
-    /**
-     * Modify an existing contact
-     */
-    public function modify($basedn, $dnToEdit, User $user)
-    {
-        $usernameToEdit = $user->getUsername();
-        //get a reference to the current entry
-
-        $result = ldap_search($this->connection, $dnToEdit, "uid=$usernameToEdit");
-
-        if (!$result) {
-            // the search failed
-            $this->ldapError();
-        }
-
-        //convert the results to an array for easier use.
-        $contact = $this->resultToArray($result);
-
-        //set the new values
-        $contact['givenname'] = $user->getFirstname();
-        $contact['sn'] = $user->getLastname();
-        $contact['streetaddress'] = $user->getAddress();
-        $contact['telephonenumber'] = $user->getPhone();
-
-        //remove any empty entries
-        foreach ($contact as $key => $value) {
-            if (empty($value)) {
-                unset($contact[$key]);
-            }
-        }
-
-        //Find the new CN - in case the first or last name has changed
-        $cn = 'cn='. $user->getFirstname() .' '. $user->getLastname();
-
-        //rename the record (handling if the first/last name have changed)
-        $changed = ldap_rename($this->connection, $dnToEdit, $cn, null, true);
-        if ($changed)
-        {
-            //find the DN for the potentially revised name
-            $newdn = $cn .','. $basedn;
-
-            //now we can apply any changes in the contact information
-            ldap_mod_replace($this->connection, $newdn, $contact);
-        }
-        else
-        {
-            $this->ldapError();
-        }
-    }
-
-    /**
-     * Remove an existing contact
-     */
-    public function delete($dnToDelete)
-    {
-        $removed = ldap_delete($this->connection, $dnToDelete);
-        if (!$removed)
-        {
-            $this->ldapError();
-        }
+        return ['count' => 0];
     }
 
     /**
@@ -210,7 +144,6 @@ class LdapRawCaller {
             'Error: ('. ldap_errno($this->connection) .') '. ldap_error($this->connection)
         );
     }
-
 
     /**
      * Convert an LDAP search result into an array
@@ -253,5 +186,68 @@ class LdapRawCaller {
     public function disconnect()
     {
         ldap_unbind($this->connection);
+    }
+
+
+
+    public function changePassword($user, $oldPassword, $newPassword)
+    {
+        $message = [];
+        $dn = "ou=Users," . $this->baseDn;
+        $this->bindAdmin();
+        // bind anon and find user by uid
+        $user_search = ldap_search($this->connection, $dn, "(|(uid=$user)(mail=$user))");
+        $user_get = ldap_get_entries($this->connection, $user_search);
+        $user_entry = ldap_first_entry($this->connection, $user_search);
+        $user_dn = ldap_get_dn($this->connection, $user_entry);
+
+        /* Start the testing */
+        if (@ldap_bind($this->connection, $user_dn, $oldPassword) === false) {
+            $message[] = "Error E101 - Current Username or Password is wrong.";
+            return ['response' => false, 'errors' => $message];
+        }
+        $encoded_newPassword = "{SHA}" . base64_encode( pack( "H*", sha1( $newPassword ) ) );
+
+
+        if (strlen($newPassword) < 8 ) {
+            $message[] = "Error E103 - Your new password is too short.<br/>Your password must be at least 8 characters long.";
+            return ['response' => false, 'errors' => $message];
+        }
+//        if (!preg_match("/[0-9]/",$newPassword)) {
+//            $message[] = "Error E104 - Your new password must contain at least one number.";
+//            return ['response' => false, 'errors' => $message];
+//        }
+//        if (!preg_match("/[a-zA-Z]/",$newPassword)) {
+//            $message[] = "Error E105 - Your new password must contain at least one letter.";
+//            return ['response' => false, 'errors' => $message];
+//        }
+//        if (!preg_match("/[A-Z]/",$newPassword)) {
+//            $message[] = "Error E106 - Your new password must contain at least one uppercase letter.";
+//            return ['response' => false, 'errors' => $message];
+//        }
+//        if (!preg_match("/[a-z]/",$newPassword)) {
+//            $message[] = "Error E107 - Your new password must contain at least one lowercase letter.";
+//            return ['response' => false, 'errors' => $message];
+//        }
+        if (!$user_get) {
+            $message[] = "Error E200 - Unable to connect to server, you may not change your password at this time, sorry.";
+            return ['response' => false, 'errors' => $message];
+        }
+
+        /* And Finally, Change the password */
+        $entry = array();
+        $entry["userPassword"] = "$encoded_newPassword";
+
+        if (ldap_modify($this->connection, $user_dn, $entry) === false){
+            $error = ldap_error($this->connection);
+            $errno = ldap_errno($this->connection);
+            $message[] = "E201 - Your password cannot be change, please contact the administrator.";
+            $message[] = "$errno - $error";
+
+            return ['response' => false, 'errors' => $message];
+        } else {
+
+            return ['response' => true];
+        }
     }
 }

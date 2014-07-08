@@ -12,6 +12,11 @@ class LdapReceiver
 {
     public static $stopWord = "quit";
 
+    public static $codificatedFields = [
+        'password',
+        'old_password'
+    ];
+
     public function processMessage($msg)
     {
         echo "\n--------\n";
@@ -30,15 +35,39 @@ class LdapReceiver
             return;
         }
 
-        switch ($message) {
-
+        switch ($message->operation) {
+            case 'add_user':
+                break;
+            case 'change_password':
+                break;
+            case 'test_login':
+                break;
+            case 'login':
+                break;
+            case 'remove_group':
+                break;
+            case 'add_group':
+                break;
+            default:
+                return;
         }
     }
 
     public function decodeMessage($message)
     {
+        $message = json_decode($message);
 
+        foreach ($message->data as $field => $value) {
+            if (in_array(self::$codificatedFields, $field )) {
+                $message->data->$field = $this->decode($value);
+            }
+        }
         return $message;
+    }
+
+    protected function decode($value)
+    {
+        return $value;
     }
 
     public static function shutdown($channel, $conn)

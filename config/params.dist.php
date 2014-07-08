@@ -20,3 +20,11 @@ define("LDAP_PORT", 636);
 define("LDAP_SECURITY", "SSL");
 define('LDAP_VERSION', 3);
 define('LDAP_BASE_DN', 'dc=example,dc=com');
+
+define('LDAP_ADMIN_DN', "cn=admin,dc=example,dc=com");
+define('LDAP_ADMIN_PASSWORD', "password");
+
+/**
+ * percorso degli script add_[group]_user.sh
+ */
+define('LDAP_PATH_SCRIPTS', './bin/');

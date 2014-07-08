@@ -26,7 +26,7 @@ class PasswordEncrypter
         );
 
         if (!(@file_exists($MKNTPWD) && is_executable($MKNTPWD))) {
-            fatal_error("You don't have the mkntpwd program in the correct path (look in config.php)
+            throw new \Exception("You don't have the mkntpwd program in the correct path (look in config.php)
             or it is not executable");
         }
         $sambaPassCommand = $MKNTPWD . " " . $password;

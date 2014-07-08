@@ -20,4 +20,8 @@ $application->add(new Commands\RabbitLdapSetupCommand);
 $application->add(new Commands\RabbitLdapReceiverCommand);
 
 $application->add(new Commands\LdapLoginCommand());
+$application->add(new Commands\LdapTestLoginCommand());
+$application->add(new Commands\LdapChangePasswordCommand());
+$application->add(new Commands\LdapAddUserCommand());
+
 $application->run();
