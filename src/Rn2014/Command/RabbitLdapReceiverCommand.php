@@ -7,6 +7,8 @@
 
 namespace Rn2014\Command;
 
+use Rn2014\Ldap\LdapCommander;
+use Rn2014\Ldap\LdapRawCaller;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -58,7 +60,7 @@ class RabbitLdapReceiverCommand extends Command
         $user = RABBITMQ_USER;
         $password = RABBITMQ_PASS;
 
-        LdapReceiver::$stopWord = $stop_word;
+        $ldapReceiver = new LdapReceiver($this->getApplication(), $output);
 
         $connection = new AMQPConnection($host, $port, $user, $password);
         $output->writeln("connection opened");
@@ -69,12 +71,11 @@ class RabbitLdapReceiverCommand extends Command
         /* $prefetch_size, $prefetch_count, $a_global */
         $channel->basic_qos(null, 1, null);
 
-        $ldapReceiver = new LdapReceiver();
         $channel->basic_consume($queue_name, $consumer_tag, false, false, false, false, [$ldapReceiver, 'processMessage']);
 
         register_shutdown_function(['Rn2014\Queue\LdapReceiver', 'shutdown'], $channel, $connection);
 
-// Loop as long as the channel has callbacks registered
+        // Loop as long as the channel has callbacks registered
         while(count($channel->callbacks)) {
             $output->writeln("message received");
             $channel->wait();

@@ -22,6 +22,9 @@ $application->add(new Commands\RabbitLdapReceiverCommand);
 $application->add(new Commands\LdapLoginCommand());
 $application->add(new Commands\LdapTestLoginCommand());
 $application->add(new Commands\LdapChangePasswordCommand());
-$application->add(new Commands\LdapAddUserCommand());
+$application->add(new Commands\LdapUserAddCommand());
+$application->add(new Commands\LdapUserRemoveCommand());
+//$application->add(new Commands\LdapUserDisableCommand());
+$application->add(new Commands\LdapUserGroupCommand());
 
 $application->run();

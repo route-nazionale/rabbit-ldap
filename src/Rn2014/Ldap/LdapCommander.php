@@ -11,7 +11,7 @@ namespace Rn2014\Ldap;
 class LdapCommander {
 
     private $ldap;
-    private $path_scripts = "/root/";
+    private $path_scripts = "/bin/";
 
     public function __construct(LdapRawCaller $ldapCaller)
     {
@@ -57,29 +57,35 @@ class LdapCommander {
 
         switch ($groupType) {
             case 'oneteam':
-                $command = "add_oneteam_user.sh";
+                $script = "add_oneteam_user.sh";
                 break;
             case 'rs':
-                $command = "add_rs_user.sh";
+                $script = "add_rs_user.sh";
                 break;
             case 'test':
-                $command = "add_test_user.sh";
+                $script = "add_test_user.sh";
                 break;
             default:
                 throw new \Exception("group Type [$groupType] not found! (oneteam|rs) ");
                 break;
         }
 
-        $params = sprintf(' "%s" "%s" "%s" ',
-            escapeshellarg($username),
-            escapeshellarg($complete_name),
-            escapeshellarg($password));
 
-        if (!is_file($this->path_scripts  . $command)) {
-            return ['response' => false, 'errors' => ["Script [$command] not found"]];
+        if (!is_file($this->path_scripts  . $script)) {
+            return ['response' => false, 'errors' => [
+                "Script [{$this->path_scripts}{$script}] not found",
+                $this->path_scripts,
+            ]];
         }
 
-        exec($this->path_scripts  . $command . $params, $output);
+        $params = sprintf(
+                    ' "%s" "%s" "%s" ',
+                    escapeshellarg($username),
+                    escapeshellarg($complete_name),
+                    escapeshellarg($password)
+        );
+
+        exec($this->path_scripts  . $script . $params, $output);
 
         return 0 === count($output)? ['response' => true] : ['response' => false, 'errors' => $output];
     }
@@ -91,5 +97,40 @@ class LdapCommander {
         $response = $this->ldap->changePassword($username, $old_password, $password);
 
         return $response;
+    }
+
+    public function userChangeGroup($username, $group, $add = true)
+    {
+        $this->ldap->bindAdmin();
+
+        if ($add)
+        $response = $this->ldap->userAddGroup($username, $group);
+        else {
+            $response = $this->ldap->userRemoveGroup($username, $group);
+        }
+        return $response;
+    }
+
+    public function removeUser($username, $password)
+    {
+        $this->ldap->bindAnonymously();
+
+        $dn = $this->ldap->getDn($username);
+
+        $this->ldap->bindAdmin();
+
+        $response = $this->ldap->removeUser($dn);
+
+        return $response;
+    }
+
+    public function disableUser($username)
+    {
+        return $this->ldap->changeUser($username, 0) === 0 ? ['response' => true]: ['response' => false, 'errors' => ['not modified']];
+
+    }
+    public function enableUser($username)
+    {
+        $this->ldap->changeUser($username, 1 ) === 1 ? ['response' => true]: ['response' => false, 'errors' => ['not modified']];
     }
 }

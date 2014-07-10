@@ -69,13 +69,16 @@ class RabbitTestSendCommand extends Command
 
             $msg = $this->createMessage($stop_word);
         } else {
-            $utente = new \StdClass;
-            $utente->nome = "prova";
-            $utente->cognome = "gracco";
-
-            $msg = $this->createMessage($utente);
+            $user = new \StdClass;
+            $user->name = "prova prova";
+            $user->username = "testlancio";
+            $user->password = "123123123";
+            $user->type= "test";
+            $message = new \stdClass();
+            $message->operation = "add_user";
+            $message->data = $user;
+            $msg = $this->createMessage($message);
         }
-
 
         $channel->basic_publish($msg, $exchange_name, $routing_key);
 
@@ -87,10 +90,10 @@ class RabbitTestSendCommand extends Command
         $output->writeln("connection closed");
     }
 
-    protected function createMessage($utente)
+    protected function createMessage($message)
     {
-        $data = json_encode($utente);
-        $message = new AMQPMessage($data);
-        return $message;
+        $data = json_encode($message);
+        $amqpMessage = new AMQPMessage($data);
+        return $amqpMessage;
     }
 }

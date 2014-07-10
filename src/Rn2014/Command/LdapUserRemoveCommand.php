@@ -16,43 +16,28 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class LdapAddUserCommand extends Command
+class LdapUserRemoveCommand extends Command
 {
     protected function configure()
     {
         $this
-            ->setName('ldap:add:user')
-            ->setDescription('Nuovo utente')
-            ->addOption(
-                'type',
-                't',
-                InputOption::VALUE_REQUIRED,
-                'type of user (oneteam|rs|test)',
-                "oneteam"
-            )
+            ->setName('ldap:user:remove')
+            ->setDescription('Rimozione dell\'utente')
             ->addArgument(
                 'username',
                 InputArgument::REQUIRED,
                 'username'
             )
             ->addArgument(
-                'name',
-                InputArgument::REQUIRED,
-                'nome completo'
-            )
-            ->addArgument(
                 'password',
                 InputArgument::REQUIRED,
-                'nuova password'
+                'password'
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $type = $input->getOption('type');
-
         $username  = $input->getArgument('username');
-        $name = $input->getArgument('name');
         $password = $input->getArgument('password');
 
         $params = array(
@@ -72,14 +57,13 @@ class LdapAddUserCommand extends Command
 
             $ldap = new LdapCommander($ldapCaller);
 
-            $ldap->setPathScripts(LDAP_PATH_SCRIPTS);
+            $response = $ldap->removeUser($username, $password);
 
-            $result = $ldap->addUser($type, $username, $name, $password);
-
-            $output->writeln("new user: " . ($result['response'] ? "OK":"KO"));
-
-            if (!$result['response']) {
-                var_dump($result['errors']);
+            $output->writeln("user [$username] removed: " . ($response['response'] ? "OK":"KO"));
+            if (!$response['response']) {
+                foreach ($response['errors'] as $error) {
+                    $output->writeln("error: " . $error);
+                }
             }
 
         } catch (\Exception $e) {

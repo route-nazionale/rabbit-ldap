@@ -5,52 +5,121 @@
  * Time: 05:30
  */
 
-    namespace Rn2014\Queue;
+namespace Rn2014\Queue;
 
-
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Console\Output\OutputInterface
+    ;
 class LdapReceiver
 {
-    public static $stopWord = "quit";
+    protected $app;
+    protected $output;
 
     public static $codificatedFields = [
         'password',
         'old_password'
     ];
 
-    public function processMessage($msg)
+    public function __construct(Application $application, OutputInterface $output )
+    {
+        $this->app = $application;
+        $this->output = $output;
+    }
+
+    public function processMessage($req)
     {
         echo "\n--------\n";
-        //print_r($msg);
-        echo $msg->body;
+        echo $req->body;
         echo "\n--------\n";
 
 
-        $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+        $message = $this->decodeMessage($req->body);
 
-        $message = $this->decodeMessage($msg->body);
+        $req->delivery_info['channel']->basic_ack($req->delivery_info['delivery_tag']);
 
-        // Send a message with the string "quit" to cancel the consumer.
-        if ($message === LdapReceiver::$stopWord) {
-            $msg->delivery_info['channel']->basic_cancel($msg->delivery_info['consumer_tag']);
-            return;
-        }
+        $data = $message->data;
 
         switch ($message->operation) {
             case 'add_user':
+                $stringCommand = 'ldap:user:add';
+
+                $arguments = array(
+                    'command' => $stringCommand,
+                    'username'    => $data->username,
+                    'name'    => $data->name,
+                    'password'    => $data->password,
+                    '--type'    => $data->type,
+                );
+
+                break;
+            case 'remove_user':
+
+                $stringCommand = 'ldap:user:remove';
+
+                $data = $message->data;
+
+                $arguments = array(
+                    'command' => $stringCommand,
+                    'username'    => $data->username,
+                    'password'    => $data->password,
+                );
+
                 break;
             case 'change_password':
-                break;
-            case 'test_login':
-                break;
-            case 'login':
+
+                $stringCommand = 'ldap:change:password';
+
+                $data = $message->data;
+
+                $arguments = array(
+                    'command' => $stringCommand,
+                    'username'    => $data->username,
+                    'old_password'    => $data->old_password,
+                    'password'    => $data->password,
+                );
+
                 break;
             case 'remove_group':
+
+                $stringCommand = 'ldap:user:group';
+
+                $data = $message->data;
+
+                $arguments = array(
+                    'command' => $stringCommand,
+                    'username'    => $data->username,
+                    'group'    => $data->group,
+                    '--remove'    => true,
+                );
+
                 break;
             case 'add_group':
+
+                $stringCommand = 'ldap:user:group';
+
+                $data = $message->data;
+
+                $arguments = array(
+                    'command' => $stringCommand,
+                    'username'    => $data->username,
+                    'group'    => $data->group,
+                );
+
                 break;
+//            case 'test_login':
+//                break;
+//            case 'login':
+//                break;
             default:
                 return;
         }
+
+        $command = $this->app->find($stringCommand);
+        $input = new ArrayInput($arguments);
+        $returnCode = $command->run($input, $this->output);
     }
 
     public function decodeMessage($message)
@@ -58,7 +127,7 @@ class LdapReceiver
         $message = json_decode($message);
 
         foreach ($message->data as $field => $value) {
-            if (in_array(self::$codificatedFields, $field )) {
+            if (in_array($field, self::$codificatedFields)) {
                 $message->data->$field = $this->decode($value);
             }
         }
