@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" dir="ltr" lang="it"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="rn2014 authentication page">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>RN2014 - authentication page</title>
+    <link rel="shortcut icon" href="favicon.png">
+
+    {#<script type="text/javascript" src="/lib/jquery-1.10.2.min.js"></script>#}
+    {#<script type="text/javascript" src="/lib/bootstrap.min.js"></script>#}
+    {#<script type="text/javascript" src="/lib/bootstrap-select.min.js"></script>#}
+    {#<script type="text/javascript" src="/lib/jquery.cookie.js"></script>#}
+
+    {#<script type="text/javascript" src="/app/release/js/const.js"></script>#}
+    {#<script type="text/javascript" src="/app/release/js/lib.js"></script>#}
+
+    {#<link rel="stylesheet" href="/lib/bootstrap.min.css">#}
+    {#<link rel="stylesheet" href="/lib/bootstrap-select.css">#}
+    {% block optionalcss %}
+
+    {% endblock %}
+    <link rel="stylesheet" href="/css/main.css">
+
+    {#<!--[if IE]>#}
+    {#<script type="text/javascript" src="/lib/html5shiv.js"></script>#}
+    {#<script type="text/javascript" src="/lib/respond.min.js"></script>#}
+    {#<![endif]-->#}
+<style>
+    .flash{
+        border: 2px solid;
+        margin:20px;
+        padding:20px;
+    }
+    .error{
+        border-color:#ff0000;
+        background-color:#ffaaaa;
+    }
+    .success{
+        border-color:#00ff00;
+        background-color:#aaffaa;
+    }
+</style>
+</head>
+
+<body>
+<!-- WRAPPER START -->
+<div id="maincontainer" class="container">
+    <div id="wrapper">
+        {% for message in app.session.getFlashBag.get('error') %}
+            <div class="flash error">{{ message }}</div>
+        {% endfor %}
+        {% for message in app.session.getFlashBag.get('success') %}
+            <div class="flash success">{{ message }}</div>
+        {% endfor %}
+        <form method="POST" action="{{ path('test.form.validate') }}">
+            <div><label for="username">username</label></div>
+            <div><input type="text" id="username" name="username"></div>
+            <div><label for="password">password</label></div>
+            <div><input type="password" id="password" name="password"></div>
+            <div><button>Test</button></div>
+        </form>
+
+    </div>
+</div>
+<!-- WRAPPER END -->
+
+{% block afterscript %}
+
+
+{% endblock %}
+
+</body>
+</html>

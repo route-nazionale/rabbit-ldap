@@ -83,7 +83,9 @@ class LdapRawCaller {
 
     public function testPassword($dn, $password)
     {
-
+        if(empty($dn) || empty($password)) {
+            return false;
+        }
 //    //        echo $dn;
 //            $attr = "userPassword";
 //
@@ -97,8 +99,9 @@ class LdapRawCaller {
 //
 //            return $r;
 
-            $r = $this->bind($dn, $password);
-            return $r;
+        $r = $this->bind($dn, $password);
+
+        return $r;
 
     }
 

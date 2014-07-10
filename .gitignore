@@ -1,4 +1,5 @@
 .idea
 vendor
-config/params.php
+!config/params.dist.php
+config/
 bin
