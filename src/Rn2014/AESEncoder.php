@@ -10,12 +10,12 @@ namespace RN2014;
 class AESEncoder
 {
     private $publicKey;
-    private $privateKey;
+    private $iv;
 
-    public function __construct($publicKey, $privateKey = null)
+    public function __construct($publicKey, $iv)
     {
         $this->publicKey = $publicKey;
-        $this->privateKey = $privateKey;
+        $this->iv = $iv;
         $this->cipher = new \Crypt_AES(CRYPT_AES_MODE_CBC);
     }
 
@@ -23,28 +23,55 @@ class AESEncoder
     {
         $crypt_text = base64_decode($testo);
 
-        $iv = substr($crypt_text,0,32);
-        $testoRidotto = substr($crypt_text,32);
-
         $this->cipher->setKey($this->publicKey);
-        $this->cipher->setIV($iv);
-        $decoded = $this->cipher->decrypt($testoRidotto);
+        $this->cipher->setIV($this->iv);
+
+        $this->cipher->disablePadding();
+
+        $decoded = $this->cipher->decrypt($crypt_text);
+
+        $decoded  = $this->unpad($decoded, 32);
 
         return $decoded;
     }
 
     public function encode($testo)
     {
-//        $crypt_text = base64_decode($testo);
+        $this->cipher->setKey($this->publicKey);
+        $this->cipher->setIV($this->iv);
 
-//        $iv = substr($crypt_text,0,32);
-//        $testoRidotto = substr($crypt_text,32);
+//        $testo  = $this->pad($testo, 32);
 
-
-        $this->cipher->setKey($this->privateKey);
-//        $this->cipher->setIV($iv);
         $encoded = $this->cipher->encrypt($testo);
+
         $crypt_text = base64_encode($encoded);
+
         return $crypt_text;
     }
+
+    public function pad ( $data, $block_size ) {
+
+        $pad = $block_size - ( strlen( $data ) % $block_size );
+
+        return $data . str_repeat( chr( $pad ), $pad );
+
+    }
+
+    public function unpad ( $data, $block_size ) {
+
+        $pad = ord( substr( $data, -1 ) );
+
+        if ( $pad > $block_size ) {
+            return false;
+        }
+
+        if ( $pad === strspn( $data, chr( $pad ), -$pad ) ) {
+            return substr( $data, 0, -1 * $pad );
+        }
+        else {
+            return false;
+        }
+
+    }
+
 }

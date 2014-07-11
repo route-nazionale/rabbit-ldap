@@ -28,3 +28,21 @@ define('LDAP_ADMIN_PASSWORD', "password");
  * percorso degli script add_[group]_user.sh
  */
 define('LDAP_PATH_SCRIPTS', './bin/');
+
+
+/*
+ * se non sono presenti le cerca su db
+ * iv e key di decrypt
+ */
+define('AES_IV', ''); //iv 16byte
+define('AES_KEY', ''); //key 32byte
+
+/**
+ * accesso al db per prelevare iv e key di decrypt
+ */
+define('MYSQL_HOST', 'localhost');
+define('MYSQL_PORT', '3662');
+define('MYSQL_DB', 'database');
+define('MYSQL_USER', 'username');
+define('MYSQL_PASS', 'password');
+

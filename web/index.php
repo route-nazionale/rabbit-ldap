@@ -15,6 +15,7 @@ use Silex\Provider as Providers;
 use Rn2014\AESEncoder;
 
 $app = new Application();
+
 $app['debug'] = true;
 
 $app->register(new Providers\TwigServiceProvider(), [
@@ -24,11 +25,39 @@ $app->register(new Providers\TwigServiceProvider(), [
 $app->register(new Providers\SessionServiceProvider());
 $app->register(new Providers\UrlGeneratorServiceProvider());
 
-$app['aes.encoder'] = $app->share(function() use ($app) {
-    $key = file_get_contents("cert.pem");
-    $privateKey = file_get_contents("key.pem");
+$app->register(new Providers\DoctrineServiceProvider(), [
+    'db.options' => [
+        'driver'   => 'pdo_mysql',
+        'host'     => MYSQL_HOST,
+        'port'     => MYSQL_PORT,
+        'dbname'     => MYSQL_DB,
+        'user'     => MYSQL_USER,
+        'password'     => MYSQL_PASS,
+        'charset'     => 'utf8',
+    ],
+]);
 
-    return new AESEncoder($key,$privateKey);
+$app['aes.encoder'] = $app->share(function() use ($app, $key, $iv) {
+
+    if (AES_IV && AES_KEY) {
+
+        $iv = AES_IV;
+        $key = AES_KEY;
+
+    } else {
+
+        $sql = "SELECT * FROM crypt LIMIT 1";
+        $cryptData = $app['db']->fetchAssoc($sql);
+
+        if (!$cryptData) {
+            throw new \Exception("key and iv not found");
+        }
+
+        $iv = base64_decode($cryptData['iv']);
+        $key = base64_decode($cryptData['key']);
+    }
+
+    return new AESEncoder($key,$iv);
 });
 
 $app['ldap'] = $app->share(function() use ($app) {
@@ -39,16 +68,12 @@ $app['ldap'] = $app->share(function() use ($app) {
         'security'      => LDAP_SECURITY,
         'base_dn'       => LDAP_BASE_DN,
         'options'       => [LDAP_OPT_PROTOCOL_VERSION => LDAP_VERSION],
-//            'admin'         => [
-//                'dn'        => LDAP_ADMIN_DN,
-//                'password'  => LDAP_ADMIN_PASSWORD,
-//            ]
     ];
 
     $ldapCaller = new \Rn2014\Ldap\LdapRawCaller($params);
     $ldap = new \Rn2014\Ldap\LdapCommander($ldapCaller);
-    return $ldap;
 
+    return $ldap;
 });
 
 $checkJsonRequest = (function (Request $request) {
@@ -99,6 +124,7 @@ $app->post("/login", function() use ($app){
     $encodedPassword = $app['request']->get('password', null);
 
     $decodedPassword = $app['aes.encoder']->decode($encodedPassword);
+
     try {
 
         $response = $app['ldap']->attemptLogin($username, $decodedPassword, $group);
@@ -116,16 +142,20 @@ $app->post("/login", function() use ($app){
 
     return new Symfony\Component\HttpFoundation\JsonResponse($response);
 
-})->before("checkJsonRequest");
+})->before($checkJsonRequest);
 
 $app->get("/encode/{password}", function($password) use ($app){
 
     return $app['aes.encoder']->encode($password);
 });
 
-$app->get("/decode/{password}", function($password) use ($app){
+$app->get("/decode", function() use ($app){
 
+    $password = $app['request']->query->get('password', '');
+    echo $app['aes.encoder']->decode($password);;
     return $app['aes.encoder']->decode($password);
 });
 
 $app->run();
+
+
