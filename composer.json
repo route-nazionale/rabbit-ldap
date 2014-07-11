@@ -5,7 +5,8 @@
         "symfony/console": "2.3.*@dev",
         "phpseclib/phpseclib": "dev-php5",
         "silex/silex": "1.2.*@dev",
-        "symfony/twig-bridge": "2.6.*@dev"
+        "symfony/twig-bridge": "2.6.*@dev",
+        "doctrine/dbal": "2.2.*"
     },
     "autoload": {
         "psr-0": {
