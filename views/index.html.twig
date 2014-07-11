@@ -32,6 +32,11 @@
     {#<script type="text/javascript" src="/lib/respond.min.js"></script>#}
     {#<![endif]-->#}
 <style>
+    body {
+        text-align: center;
+        font-size: 16px;
+        font-family: verdana, helvetica, arial, sans-serif;
+    }
     .flash{
         border: 2px solid;
         margin:20px;
@@ -45,6 +50,18 @@
         border-color:#00ff00;
         background-color:#aaffaa;
     }
+    form div {
+        margin: 10px;
+    }
+    input {
+        padding:10px;
+        font-size: 16px;
+    }
+    button {
+        margin: 10px 10%;
+        padding: 10px;
+        width: 20%;
+    }
 </style>
 </head>
 
@@ -52,6 +69,8 @@
 <!-- WRAPPER START -->
 <div id="maincontainer" class="container">
     <div id="wrapper">
+        <h1>Test Login</h1>
+        <p>prova qui le tue credenziali!</p>
         {% for message in app.session.getFlashBag.get('error') %}
             <div class="flash error">{{ message }}</div>
         {% endfor %}
@@ -63,7 +82,7 @@
             <div><input type="text" id="username" name="username"></div>
             <div><label for="password">password</label></div>
             <div><input type="password" id="password" name="password"></div>
-            <div><button>Test</button></div>
+            <div><button>TEST</button></div>
         </form>
 
     </div>
