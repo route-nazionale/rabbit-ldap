@@ -71,10 +71,12 @@ class RabbitLdapReceiverCommand extends Command
             $config = new \Doctrine\DBAL\Configuration();
 
             $connectionParams = array(
-                'dbname' => 'mydb',
-                'user' => 'user',
-                'password' => 'secret',
-                'host' => 'localhost',
+                'dbname' => MYSQL_HOST,
+                'user' => MYSQL_USER,
+                'password' => MYSQL_PASS,
+                'host' => PASS_HOST,
+                'port' => PASS_PORT,
+                'charset'     => 'utf8',
                 'driver' => 'pdo_mysql',
             );
             $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
