@@ -7,6 +7,7 @@
 
 namespace Rn2014\Queue;
 
+use RN2014\AESEncoder;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -17,16 +18,18 @@ class LdapReceiver
 {
     protected $app;
     protected $output;
+    protected $aesEncoder;
 
     public static $codificatedFields = [
         'password',
         'old_password'
     ];
 
-    public function __construct(Application $application, OutputInterface $output )
+    public function __construct(Application $application, OutputInterface $output, AESEncoder $aesEncoder )
     {
         $this->app = $application;
         $this->output = $output;
+        $this->aesEncoder = $aesEncoder;
     }
 
     public function processMessage($req)
@@ -128,7 +131,7 @@ class LdapReceiver
 
         foreach ($message->data as $field => $value) {
             if (in_array($field, self::$codificatedFields)) {
-                $message->data->$field = $this->decode($value);
+                $message->data->$field = $this->aesEncoder->decode($value);
             }
         }
         return $message;

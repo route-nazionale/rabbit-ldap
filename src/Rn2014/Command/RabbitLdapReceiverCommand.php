@@ -7,6 +7,7 @@
 
 namespace Rn2014\Command;
 
+use RN2014\AESEncoder;
 use Rn2014\Ldap\LdapCommander;
 use Rn2014\Ldap\LdapRawCaller;
 use Symfony\Component\Console\Command\Command;
@@ -60,7 +61,37 @@ class RabbitLdapReceiverCommand extends Command
         $user = RABBITMQ_USER;
         $password = RABBITMQ_PASS;
 
-        $ldapReceiver = new LdapReceiver($this->getApplication(), $output);
+        if (AES_IV && AES_KEY) {
+
+            $iv = AES_IV;
+            $key = AES_KEY;
+
+        } else {
+
+            $config = new \Doctrine\DBAL\Configuration();
+
+            $connectionParams = array(
+                'dbname' => 'mydb',
+                'user' => 'user',
+                'password' => 'secret',
+                'host' => 'localhost',
+                'driver' => 'pdo_mysql',
+            );
+            $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
+            $sql = "SELECT * FROM crypt LIMIT 1";
+            $cryptData = $conn->fetchAssoc($sql);
+
+            if (!$cryptData) {
+                throw new \Exception("key and iv not found");
+            }
+
+            $iv = base64_decode($cryptData['iv']);
+            $key = base64_decode($cryptData['key']);
+        }
+
+        $aesEncoder = new AESEncoder($key, $iv);
+
+        $ldapReceiver = new LdapReceiver($this->getApplication(), $output, $aesEncoder);
 
         $connection = new AMQPConnection($host, $port, $user, $password);
         $output->writeln("connection opened");
