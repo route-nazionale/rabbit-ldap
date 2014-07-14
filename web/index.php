@@ -112,7 +112,7 @@ $app->before(function() use ($app){
  * ROUTES
  */
 $app->get("/", function() use ($app){
-    return $app['twig']->render("index.html.twig", $params);
+    return $app['twig']->render("index.html.twig", []);
 })
     ->bind('test.form');
 
