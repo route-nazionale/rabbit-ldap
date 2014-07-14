@@ -5,7 +5,7 @@
  * Time: 22:33
  */
 
-namespace RN2014;
+namespace Rn2014;
 
 class AESEncoder
 {
