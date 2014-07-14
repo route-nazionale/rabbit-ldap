@@ -80,7 +80,8 @@ class RabbitLdapReceiverCommand extends Command
                 'driver' => 'pdo_mysql',
             );
             $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
-            $sql = "SELECT * FROM crypt LIMIT 1";
+
+            $sql = "SELECT * FROM aes LIMIT 1";
             $cryptData = $conn->fetchAssoc($sql);
 
             if (!$cryptData) {

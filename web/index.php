@@ -22,7 +22,14 @@ $app->register(new Providers\TwigServiceProvider(), [
     'twig.path' => __DIR__.'/../views',
 ]);
 
+$app->register(new Providers\MonologServiceProvider(),[
+    'monolog.logfile' => __DIR__.'/../development.log',
+    'monolog.name' => 'auth',
+    'monolog.level' => \Monolog\Logger::WARNING,
+]);
+
 $app->register(new Providers\SessionServiceProvider());
+
 $app->register(new Providers\UrlGeneratorServiceProvider());
 
 $app->register(new Providers\DoctrineServiceProvider(), [
@@ -37,7 +44,17 @@ $app->register(new Providers\DoctrineServiceProvider(), [
     ],
 ]);
 
-$app['aes.encoder'] = $app->share(function() use ($app, $key, $iv) {
+$app['monolog.login.logfile'] = __DIR__ . '/../auth.log';
+$app['monolog.login.level'] = \Monolog\Logger::INFO;
+$app['monolog.login'] = $app->share(function ($app) {
+    $log = new $app['monolog.logger.class']('login');
+    $handler = new \Monolog\Handler\StreamHandler($app['monolog.login.logfile'], $app['monolog.login.level']);
+    $log->pushHandler($handler);
+
+    return $log;
+});
+
+$app['aes.encoder'] = $app->share(function() use ($app) {
 
     if (AES_IV && AES_KEY) {
 
@@ -46,7 +63,7 @@ $app['aes.encoder'] = $app->share(function() use ($app, $key, $iv) {
 
     } else {
 
-        $sql = "SELECT * FROM crypt LIMIT 1";
+        $sql = "SELECT * FROM aes LIMIT 1";
         $cryptData = $app['db']->fetchAssoc($sql);
 
         if (!$cryptData) {
@@ -84,6 +101,13 @@ $checkJsonRequest = (function (Request $request) {
         return new JsonResponse(["content" => "JsonData Missing"], 406);
 });
 
+$app->before(function() use ($app){
+
+    if (HTTPS_REQUIRED) {
+        $app->get('_controller')->requireHttps();
+    }
+});
+
 /**
  * ROUTES
  */
@@ -92,7 +116,8 @@ $app->get("/test", function() use ($app){
     $params = [];
     return $app['twig']->render("index.html.twig", $params);
 
-})->bind('test.form');
+})
+    ->bind('test.form');
 
 $app->post("/test", function() use ($app){
 
@@ -113,9 +138,19 @@ $app->post("/test", function() use ($app){
         $app['session']->getFlashBag()->add('error', 'Account sbagliato');
     }
 
+    $context = [
+        'username' => $username,
+        'password' => str_repeat('*', strlen($password)),
+        'result' => $response,
+        'ip' => $app['request']->getClientIps(),
+        'user_agent' => $app['request']->headers->get('User-Agent'),
+    ];
+    $app['monolog.login']->addInfo("test login", $context);
+
     return $app->redirect($app['url_generator']->generate('test.form'), 301);
 
-})->bind('test.form.validate');
+})
+    ->bind('test.form.validate');
 
 $app->post("/login", function() use ($app){
 
@@ -123,6 +158,9 @@ $app->post("/login", function() use ($app){
     $username  = $app['request']->get('username', null);
     $encodedPassword = $app['request']->get('password', null);
 
+    if (!$group || !$username || !$encodedPassword) {
+        return new JsonResponse(null,401);
+    }
     $decodedPassword = $app['aes.encoder']->decode($encodedPassword);
 
     try {
@@ -131,18 +169,28 @@ $app->post("/login", function() use ($app){
 
     } catch (\Exception $e) {
 
-        return new Symfony\Component\HttpFoundation\JsonResponse(["error" => $e->getMessage()], 500);
+        return new JsonResponse(["error" => $e->getMessage()], 500);
     }
 
     if ($response) {
-        $response = ['logged' => true];
+        $responseCode = 204;
     } else {
-        $response = ['logged' => false];
+        $responseCode = 403;
     }
 
-    return new Symfony\Component\HttpFoundation\JsonResponse($response);
+    $context = [
+        'username' => $username,
+        'password' => str_repeat('*', strlen($decodedPassword)),
+        'group' => $group,
+        'result' => $response,
+        'ip' => $app['request']->getClientIps(),
+        'user_agent' => $app['request']->headers->get('User-Agent'),
+    ];
+    $app['monolog.login']->addInfo("login", $context);
 
-})->before($checkJsonRequest);
+    return new JsonResponse(null, $responseCode);
+})
+    ->before($checkJsonRequest);
 
 $app->get("/encode/{password}", function($password) use ($app){
 
@@ -152,7 +200,7 @@ $app->get("/encode/{password}", function($password) use ($app){
 $app->get("/decode", function() use ($app){
 
     $password = $app['request']->query->get('password', '');
-    echo $app['aes.encoder']->decode($password);;
+
     return $app['aes.encoder']->decode($password);
 });
 

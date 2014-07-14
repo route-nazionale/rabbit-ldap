@@ -5,6 +5,8 @@
  * Time: 01:56
  */
 
+define('HTTPS_REQUIRED', false);
+
 define('RABBITMQ_HOST', 'localhost');
 define('RABBITMQ_PORT', 5672);
 define('RABBITMQ_USER', 'guest');

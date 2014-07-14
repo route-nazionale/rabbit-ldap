@@ -6,7 +6,8 @@
         "phpseclib/phpseclib": "dev-php5",
         "silex/silex": "1.2.*@dev",
         "symfony/twig-bridge": "2.6.*@dev",
-        "doctrine/dbal": "2.2.*"
+        "doctrine/dbal": "2.2.*",
+        "monolog/monolog": "1.10.*@dev"
     },
     "autoload": {
         "psr-0": {

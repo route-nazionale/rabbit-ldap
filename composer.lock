@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "45d525809e0efbd629924462606e7e4e",
+    "hash": "c85af3083f3f2eadaa60a5d7b754fd8e",
     "packages": [
         {
             "name": "doctrine/common",
@@ -131,17 +131,88 @@
             "time": "2012-04-13 07:56:12"
         },
         {
+            "name": "monolog/monolog",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Seldaek/monolog.git",
+                "reference": "8228d1ee833dbec710161ac179d1fb9ff6cd6f28"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/8228d1ee833dbec710161ac179d1fb9ff6cd6f28",
+                "reference": "8228d1ee833dbec710161ac179d1fb9ff6cd6f28",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0",
+                "psr/log": "~1.0"
+            },
+            "provide": {
+                "psr/log-implementation": "1.0.0"
+            },
+            "require-dev": {
+                "aws/aws-sdk-php": "~2.4, >2.4.8",
+                "doctrine/couchdb": "~1.0@dev",
+                "graylog2/gelf-php": "~1.0",
+                "phpunit/phpunit": "~3.7.0",
+                "raven/raven": "~0.5",
+                "ruflin/elastica": "0.90.*"
+            },
+            "suggest": {
+                "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
+                "doctrine/couchdb": "Allow sending log messages to a CouchDB server",
+                "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
+                "ext-mongo": "Allow sending log messages to a MongoDB server",
+                "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
+                "raven/raven": "Allow sending log messages to a Sentry server",
+                "rollbar/rollbar": "Allow sending log messages to Rollbar",
+                "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.10.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Monolog\\": "src/Monolog"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "http://seld.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Sends your logs to files, sockets, inboxes, databases and various web services",
+            "homepage": "http://github.com/Seldaek/monolog",
+            "keywords": [
+                "log",
+                "logging",
+                "psr-3"
+            ],
+            "time": "2014-06-30 13:24:53"
+        },
+        {
             "name": "phpseclib/phpseclib",
             "version": "dev-php5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "d198756a767ad88e3cf598dad7e7dc6e3043d4e0"
+                "reference": "8e0b9b2d64be7a786f4b72e9ee23dfd65d23db18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/d198756a767ad88e3cf598dad7e7dc6e3043d4e0",
-                "reference": "d198756a767ad88e3cf598dad7e7dc6e3043d4e0",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/8e0b9b2d64be7a786f4b72e9ee23dfd65d23db18",
+                "reference": "8e0b9b2d64be7a786f4b72e9ee23dfd65d23db18",
                 "shasum": ""
             },
             "require": {
@@ -227,7 +298,7 @@
                 "x.509",
                 "x509"
             ],
-            "time": "2014-07-05 15:40:07"
+            "time": "2014-07-12 10:08:36"
         },
         {
             "name": "pimple/pimple",
@@ -895,12 +966,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/TwigBridge.git",
-                "reference": "36cd8cd7d83cfbb4ee7fdb563e4714384d5e6954"
+                "reference": "a4c0b23e7f7bf7220281444ec9a312f7d05c935c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/TwigBridge/zipball/36cd8cd7d83cfbb4ee7fdb563e4714384d5e6954",
-                "reference": "36cd8cd7d83cfbb4ee7fdb563e4714384d5e6954",
+                "url": "https://api.github.com/repos/symfony/TwigBridge/zipball/a4c0b23e7f7bf7220281444ec9a312f7d05c935c",
+                "reference": "a4c0b23e7f7bf7220281444ec9a312f7d05c935c",
                 "shasum": ""
             },
             "require": {
@@ -960,7 +1031,7 @@
             ],
             "description": "Symfony Twig Bridge",
             "homepage": "http://symfony.com",
-            "time": "2014-07-09 09:06:26"
+            "time": "2014-07-11 15:37:14"
         },
         {
             "name": "twig/twig",
@@ -1025,12 +1096,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/videlalvaro/php-amqplib.git",
-                "reference": "29840e4a26872eafe65126140196af45687771f6"
+                "reference": "d2b8a292f709b79b1615bef87b1b89bde4c7c347"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/videlalvaro/php-amqplib/zipball/29840e4a26872eafe65126140196af45687771f6",
-                "reference": "29840e4a26872eafe65126140196af45687771f6",
+                "url": "https://api.github.com/repos/videlalvaro/php-amqplib/zipball/d2b8a292f709b79b1615bef87b1b89bde4c7c347",
+                "reference": "d2b8a292f709b79b1615bef87b1b89bde4c7c347",
                 "shasum": ""
             },
             "require": {
@@ -1070,7 +1141,7 @@
                 "queue",
                 "rabbitmq"
             ],
-            "time": "2014-06-28 14:08:39"
+            "time": "2014-07-14 13:24:24"
         }
     ],
     "packages-dev": [
@@ -1085,7 +1156,8 @@
         "symfony/console": 20,
         "phpseclib/phpseclib": 20,
         "silex/silex": 20,
-        "symfony/twig-bridge": 20
+        "symfony/twig-bridge": 20,
+        "monolog/monolog": 20
     },
     "platform": [
 
