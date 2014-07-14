@@ -23,7 +23,7 @@ $app->register(new Providers\TwigServiceProvider(), [
 ]);
 
 $app->register(new Providers\MonologServiceProvider(),[
-    'monolog.logfile' => __DIR__.'/../development.log',
+    'monolog.logfile' => __DIR__.'/../logs/development.log',
     'monolog.name' => 'auth',
     'monolog.level' => \Monolog\Logger::WARNING,
 ]);
@@ -44,7 +44,7 @@ $app->register(new Providers\DoctrineServiceProvider(), [
     ],
 ]);
 
-$app['monolog.login.logfile'] = __DIR__ . '/../auth.log';
+$app['monolog.login.logfile'] = __DIR__ . '/../logs/auth.log';
 $app['monolog.login.level'] = \Monolog\Logger::INFO;
 $app['monolog.login'] = $app->share(function ($app) {
     $log = new $app['monolog.logger.class']('login');
