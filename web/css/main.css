@@ -1,0 +1,30 @@
+body {
+    text-align: center;
+    font-size: 16px;
+    font-family: verdana, helvetica, arial, sans-serif;
+}
+.flash{
+    border: 2px solid;
+    margin:20px;
+    padding:20px;
+}
+.error{
+    border-color:#ff0000;
+    background-color:#ffaaaa;
+}
+.success{
+    border-color:#00ff00;
+    background-color:#aaffaa;
+}
+form div {
+    margin: 10px;
+}
+input {
+    padding:10px;
+    font-size: 16px;
+}
+button {
+    margin: 10px 10%;
+    padding: 10px;
+    width: 20%;
+}
