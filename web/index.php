@@ -16,7 +16,7 @@ use Rn2014\AESEncoder;
 
 $app = new Application();
 
-$app['debug'] = true;
+$app['debug'] = APP_DEBUG;
 
 $app->register(new Providers\TwigServiceProvider(), [
     'twig.path' => __DIR__.'/../views',
@@ -111,15 +111,12 @@ $app->before(function() use ($app){
 /**
  * ROUTES
  */
-$app->get("/test", function() use ($app){
-
-    $params = [];
+$app->get("/", function() use ($app){
     return $app['twig']->render("index.html.twig", $params);
-
 })
     ->bind('test.form');
 
-$app->post("/test", function() use ($app){
+$app->post("/", function() use ($app){
 
     $username  = $app['request']->get('username', null);
     $password = $app['request']->get('password', null);
@@ -192,17 +189,19 @@ $app->post("/login", function() use ($app){
 })
     ->before($checkJsonRequest);
 
-$app->get("/encode/{password}", function($password) use ($app){
+if ($app['debug']) {
+    $app->get("/encode/{password}", function($password) use ($app){
 
-    return $app['aes.encoder']->encode($password);
-});
+        return $app['aes.encoder']->encode($password);
+    });
 
-$app->get("/decode", function() use ($app){
+    $app->get("/decode", function() use ($app){
 
-    $password = $app['request']->query->get('password', '');
+        $password = $app['request']->query->get('password', '');
 
-    return $app['aes.encoder']->decode($password);
-});
+        return $app['aes.encoder']->decode($password);
+    });
+}
 
 $app->run();
 

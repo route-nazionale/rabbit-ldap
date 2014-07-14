@@ -5,6 +5,7 @@
  * Time: 01:56
  */
 
+define('APP_DEBUG', false);
 define('HTTPS_REQUIRED', false);
 
 define('RABBITMQ_HOST', 'localhost');
