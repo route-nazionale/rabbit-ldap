@@ -7,7 +7,7 @@
 
 namespace Rn2014\Command;
 
-use RN2014\AESEncoder;
+use Rn2014\AESEncoder;
 use Rn2014\Ldap\LdapCommander;
 use Rn2014\Ldap\LdapRawCaller;
 use Symfony\Component\Console\Command\Command;

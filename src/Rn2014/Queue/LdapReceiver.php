@@ -7,7 +7,7 @@
 
 namespace Rn2014\Queue;
 
-use RN2014\AESEncoder;
+use Rn2014\AESEncoder;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
