@@ -114,6 +114,7 @@ $app->post("/login", function() use ($app){
 
     $context = [
         'username' => $username,
+        'birthdate' => str_repeat('*', strlen($decodedBirthdate)),
         'password' => str_repeat('*', strlen($decodedPassword)),
         'group' => $group,
         'result' => $response,
