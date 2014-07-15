@@ -51,6 +51,11 @@ class LdapCommander {
         return $result;
     }
 
+    public function attemptLoginWithBirthdate($username, $birthdate, $group)
+    {
+        return $this->attemptLogin($username, $birthdate, $group);
+    }
+
     public function addUser($groupType, $username, $complete_name, $password)
     {
         $output = [];

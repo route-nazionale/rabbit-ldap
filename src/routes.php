@@ -68,21 +68,42 @@ $app->post("/", function() use ($app){
 
 $app->post("/login", function() use ($app){
 
+    $response = false;
+
+    $encodedBirthdate  = $app['request']->get('birthdate', null);
     $group  = $app['request']->get('group', null);
     $username  = $app['request']->get('username', null);
     $encodedPassword = $app['request']->get('password', null);
 
-    if (!$group || !$username || !$encodedPassword) {
+    if (!$group || !$username || !($encodedPassword || $encodedBirthdate)) {
         return new JsonResponse(null,401);
     }
 
-    $decodedPassword = $app['aes.encoder']->decode($encodedPassword);
+    $decodedPassword = false;
+    if ($encodedPassword) {
+        $decodedPassword = $app['aes.encoder']->decode($encodedPassword);
 
-    try {
-        $response = $app['ldap']->attemptLogin($username, $decodedPassword, $group);
+        try {
+            $response = $app['ldap']->attemptLogin($username, $decodedPassword, $group);
 
-    } catch (\Exception $e) {
-        return new JsonResponse(["error" => $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            return new JsonResponse(["error" => $e->getMessage()], 500);
+        }
+
+    } else {
+        $decodedBirthdate = false;
+        if( $encodedBirthdate) {
+            $decodedBirthdate = $app['aes.encoder']->decode($encodedBirthdate);
+
+            try {
+                $response = $app['ldap']->attemptLoginWithBirthdate($username, $decodedBirthdate, $group);
+
+            } catch (\Exception $e) {
+                return new JsonResponse(["error" => $e->getMessage()], 500);
+            }
+
+        }
+
     }
 
     if ($response) {
