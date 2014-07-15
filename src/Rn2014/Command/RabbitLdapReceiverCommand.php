@@ -74,8 +74,8 @@ class RabbitLdapReceiverCommand extends Command
                 'dbname' => MYSQL_HOST,
                 'user' => MYSQL_USER,
                 'password' => MYSQL_PASS,
-                'host' => PASS_HOST,
-                'port' => PASS_PORT,
+                'host' => MYSQL_HOST,
+                'port' => MYSQL_PORT,
                 'charset'     => 'utf8',
                 'driver' => 'pdo_mysql',
             );
