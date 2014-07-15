@@ -71,7 +71,7 @@ class RabbitLdapReceiverCommand extends Command
             $config = new \Doctrine\DBAL\Configuration();
 
             $connectionParams = array(
-                'dbname' => MYSQL_HOST,
+                'dbname' => MYSQL_DB,
                 'user' => MYSQL_USER,
                 'password' => MYSQL_PASS,
                 'host' => MYSQL_HOST,
