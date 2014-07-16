@@ -12,6 +12,7 @@ use Monolog\Handler\StreamHandler;
 use Rn2014\AESEncoder;
 use Rn2014\Ldap\LdapRawCaller;
 use Rn2014\Ldap\LdapCommander;
+use Rn2014\TemporaryLoginChecker;
 
 $app->register(new Providers\TwigServiceProvider(), [
     'twig.path' => __DIR__.'/../views',
@@ -28,14 +29,25 @@ $app->register(new Providers\SessionServiceProvider());
 $app->register(new Providers\UrlGeneratorServiceProvider());
 
 $app->register(new Providers\DoctrineServiceProvider(), [
-    'db.options' => [
-        'driver'   => 'pdo_mysql',
-        'host'     => MYSQL_HOST,
-        'port'     => MYSQL_PORT,
-        'dbname'     => MYSQL_DB,
-        'user'     => MYSQL_USER,
-        'password'     => MYSQL_PASS,
-        'charset'     => 'utf8',
+    'dbs.options' => [
+        'aes' => [
+            'driver'   => 'pdo_mysql',
+            'host'     => MYSQL_HOST,
+            'port'     => MYSQL_PORT,
+            'dbname'     => MYSQL_DB_AES,
+            'user'     => MYSQL_USER_AES,
+            'password'     => MYSQL_PASS_AES,
+            'charset'     => 'utf8',
+        ],
+        'ldap' => [
+            'driver'   => 'pdo_mysql',
+            'host'     => MYSQL_HOST,
+            'port'     => MYSQL_PORT,
+            'dbname'     => MYSQL_DB_LDAP,
+            'user'     => MYSQL_USER_LDAP,
+            'password'     => MYSQL_PASS_LDAP,
+            'charset'     => 'utf8',
+        ],
     ],
 ]);
 
@@ -59,7 +71,7 @@ $app['aes.encoder'] = $app->share(function() use ($app) {
     } else {
 
         $sql = "SELECT * FROM aes LIMIT 1";
-        $cryptData = $app['db']->fetchAssoc($sql);
+        $cryptData = $app['dbs']['aes']->fetchAssoc($sql);
 
         if (!$cryptData) {
             throw new \Exception("key and iv not found");
@@ -106,6 +118,17 @@ $app['ldap.admin'] = $app->share(function() use ($app) {
     $ldap = new LdapCommander($ldapCaller);
 
     return $ldap;
+});
+
+$app['auth.checker'] = $app->share(function() use ($app) {
+    switch (LOGIN_METHOD) {
+        case 'ldap':
+            return $app['ldap'];
+        case 'db':
+            return new TemporaryLoginChecker($app['dbs']['ldap']);
+        default:
+            throw new \Exception ("Login method not correct");
+    }
 });
 
 return $app;

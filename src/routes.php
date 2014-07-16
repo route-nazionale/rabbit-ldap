@@ -39,7 +39,7 @@ $app->post("/", function() use ($app){
     $password = $app['request']->get('password', null);
 
     try {
-        $response = $app['ldap']->testLogin($username, $password);
+        $response = $app['auth.checker']->testLogin($username, $password);
 
     } catch (\Exception $e) {
 
@@ -84,7 +84,7 @@ $app->post("/login", function() use ($app){
         $decodedPassword = $app['aes.encoder']->decode($encodedPassword);
 
         try {
-            $response = $app['ldap']->attemptLogin($username, $decodedPassword, $group);
+            $response = $app['auth.checker']->attemptLogin($username, $decodedPassword, $group);
 
         } catch (\Exception $e) {
             return new JsonResponse(["error" => $e->getMessage()], 500);
@@ -96,7 +96,7 @@ $app->post("/login", function() use ($app){
             $decodedBirthdate = $app['aes.encoder']->decode($encodedBirthdate);
 
             try {
-                $response = $app['ldap']->attemptLoginWithBirthdate($username, $decodedBirthdate, $group);
+                $response = $app['auth.checker']->attemptLoginWithBirthdate($username, $decodedBirthdate, $group);
 
             } catch (\Exception $e) {
                 return new JsonResponse(["error" => $e->getMessage()], 500);

@@ -36,7 +36,7 @@ class LdapReceiver
     public function processMessage($req)
     {
         echo "\n--------\n";
-        echo $req->body;
+        echo var_dump($req->body,true);
         echo "\n--------\n";
 
         $data = $this->decodeMessage($req->body);
@@ -60,8 +60,6 @@ class LdapReceiver
 
                 $stringCommand = 'ldap:user:remove';
 
-                $data = $message->data;
-
                 $arguments = array(
                     'command' => $stringCommand,
                     'username'    => $data->username,
@@ -72,8 +70,6 @@ class LdapReceiver
             case 'change_password':
 
                 $stringCommand = 'ldap:change:password';
-
-                $data = $message->data;
 
                 $arguments = array(
                     'command' => $stringCommand,
@@ -87,8 +83,6 @@ class LdapReceiver
 
                 $stringCommand = 'ldap:user:group';
 
-                $data = $message->data;
-
                 $arguments = array(
                     'command' => $stringCommand,
                     'username'    => $data->username,
@@ -100,8 +94,6 @@ class LdapReceiver
             case 'add_group':
 
                 $stringCommand = 'ldap:user:group';
-
-                $data = $message->data;
 
                 $arguments = array(
                     'command' => $stringCommand,

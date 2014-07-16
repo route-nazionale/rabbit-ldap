@@ -6,7 +6,14 @@
  */
 
 define('APP_DEBUG', false);
+
 define('HTTPS_REQUIRED', false);
+
+/**
+ * (ldap|db)
+ * definisce se utilizzare ldap o db per controllare i dati per l'autenticazione
+ */
+define('LOGIN_METHOD', 'ldap');
 
 define('RABBITMQ_HOST', 'localhost');
 define('RABBITMQ_PORT', 5672);
@@ -46,11 +53,17 @@ define('AES_IV', ''); //iv 16byte
 define('AES_KEY', ''); //key 32byte
 
 /**
- * accesso al db per prelevare iv e key di decrypt
+ * AES accesso al db per prelevare iv e key di decrypt
+ * LDAP accesso temporaneo per l'autenticaione, in attesa di sistemare ldap
  */
 define('MYSQL_HOST', 'localhost');
 define('MYSQL_PORT', '3662');
-define('MYSQL_DB', 'database');
-define('MYSQL_USER', 'username');
-define('MYSQL_PASS', 'password');
+
+define('MYSQL_DB_AES', 'database');
+define('MYSQL_USER_AES', 'username');
+define('MYSQL_PASS_AES', 'password');
+
+define('MYSQL_DB_LDAP', 'database');
+define('MYSQL_USER_LDAP', 'username');
+define('MYSQL_PASS_LDAP', 'password');
 
