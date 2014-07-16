@@ -19,6 +19,14 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 class RabbitTestSendCommand extends Command
 {
+    public function __construct($rabbit, $encoder, $name = null)
+    {
+        $this->rabbit = $rabbit;
+        $this->encoder = $encoder;
+
+        parent::__construct($name);
+    }
+
     protected function configure()
     {
         $this
@@ -44,31 +52,9 @@ class RabbitTestSendCommand extends Command
         $exchange_name  = $input->getArgument('exchange_name');
         $routing_key = $input->getArgument('routing_key');
 
-// server
-        $host = RABBITMQ_HOST;
-        $port = RABBITMQ_PORT;
-        $user = RABBITMQ_USER;
-        $password = RABBITMQ_PASS;
-        $vhost = RABBITMQ_VHOST;
-
-// sender specific
-
-        if (RABBITMQ_SSL) {
-
-            $ssl_options = array(
-                'capath' => RABBITMQ_SSL_CAPATH,
-                'cafile' => RABBITMQ_SSL_CAFILE,
-                'verify_peer' => RABBITMQ_SSL_VERIFY_PEER,
-            );
-            $connection = new AMQPSSLConnection($host, $port, $user, $password, $vhost, $ssl_options);
-
-        } else {
-            $connection = new AMQPConnection($host, $port, $user, $password, $vhost);
-        }
-
         $output->writeln("connection opened");
 
-        $channel = $connection->channel();
+        $channel = $this->rabbit->channel();
         $output->writeln("channel opened");
 
         $user = new \StdClass;
@@ -85,7 +71,7 @@ class RabbitTestSendCommand extends Command
 
         $channel->close();
         $output->writeln("channel closed");
-        $connection->close();
+        $this->rabbit->close();
         $output->writeln("connection closed");
     }
 
