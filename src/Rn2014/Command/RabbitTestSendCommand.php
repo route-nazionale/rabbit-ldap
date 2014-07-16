@@ -57,11 +57,11 @@ class RabbitTestSendCommand extends Command
         $channel = $this->rabbit->channel();
         $output->writeln("channel opened");
 
-        $user = new \StdClass;
-        $user->name = "prova prova";
-        $user->username = "testlancio";
-        $user->password = "123123123";
-        $user->type= "test";
+        $user = json_decode(file_get_contents(__DIR__ . "/../../../data/test.user.json"));
+//        $user->name = "prova prova";
+//        $user->username = "testlancio";
+//        $user->password = "123123123";
+//        $user->type= "test";
 
         $msg = $this->createMessage($user);
 

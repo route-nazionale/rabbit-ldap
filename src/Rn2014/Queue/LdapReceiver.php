@@ -47,12 +47,19 @@ class LdapReceiver
             case 'humen.insert':
                 $stringCommand = 'ldap:user:add';
 
+                if ($data->fields->oneteam) {
+                    $type = 'oneteam';
+                } elseif ($data->fields->rs) {
+                    $type = 'rs';
+                } else {
+                    $type ='test';
+                }
                 $arguments = array(
                     'command' => $stringCommand,
                     'username'    => $data->fields->cu,
                     'name'    => $data->fields->nome,
                     'password'    => $data->fields->data_nascita,
-                    '--type'    => $data->type,
+                    '--type'    => $type,
                 );
 
                 break;
