@@ -7,6 +7,7 @@
 
 namespace Rn2014\Queue;
 
+use PhpAmqpLib\Message\AMQPMessage;
 use Rn2014\AESEncoder;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -38,15 +39,12 @@ class LdapReceiver
         echo $req->body;
         echo "\n--------\n";
 
-
-        $message = $this->decodeMessage($req->body);
+        $data = $this->decodeMessage($req->body);
 
         $req->delivery_info['channel']->basic_ack($req->delivery_info['delivery_tag']);
 
-        $data = $message->data;
-
-        switch ($message->operation) {
-            case 'add_user':
+        switch ($req->get('routing_key')) {
+            case 'humen.insert':
                 $stringCommand = 'ldap:user:add';
 
                 $arguments = array(
@@ -129,9 +127,9 @@ class LdapReceiver
     {
         $message = json_decode($message);
 
-        foreach ($message->data as $field => $value) {
+        foreach ($message as $field => $value) {
             if (in_array($field, self::$codificatedFields)) {
-                $message->data->$field = $this->aesEncoder->decode($value);
+                $message->$field = $this->aesEncoder->decode($value);
             }
         }
         return $message;
