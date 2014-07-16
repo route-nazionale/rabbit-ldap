@@ -6,25 +6,34 @@
  * Time: 04:52
  */
 
-use Rn2014\Command as Commands;
-use Symfony\Component\Console\Application;
-
 require __DIR__."/vendor/autoload.php";
 require __DIR__."/config/params.php";
 
-$application = new Application();
-$application->add(new Commands\RabbitSetupCommand);
-$application->add(new Commands\RabbitMonitorSetupCommand);
-$application->add(new Commands\RabbitTestSendCommand);
-$application->add(new Commands\RabbitLdapSetupCommand);
-$application->add(new Commands\RabbitLdapReceiverCommand);
+use Rn2014\Command as Commands;
+use Knp\Provider\ConsoleServiceProvider;
+use Silex\Application;
 
-$application->add(new Commands\LdapLoginCommand());
-$application->add(new Commands\LdapTestLoginCommand());
-$application->add(new Commands\LdapChangePasswordCommand());
-$application->add(new Commands\LdapUserAddCommand());
-$application->add(new Commands\LdapUserRemoveCommand());
+$app = new Application;
+$app = require __DIR__."/src/app.php";
+
+$app->register(new ConsoleServiceProvider(), array(
+    'console.name' => 'Rn2014 RabbitLdap Console',
+    'console.version' => '1.0.0',
+    'console.project_directory' => __DIR__.''
+));
+
+$app['console']->add(new Commands\RabbitSetupCommand);
+$app['console']->add(new Commands\RabbitMonitorSetupCommand);
+$app['console']->add(new Commands\RabbitTestSendCommand);
+$app['console']->add(new Commands\RabbitLdapSetupCommand);
+$app['console']->add(new Commands\RabbitLdapReceiverCommand);
+
+$app['console']->add(new Commands\LdapLoginCommand());
+$app['console']->add(new Commands\LdapTestLoginCommand());
+$app['console']->add(new Commands\LdapChangePasswordCommand());
+$app['console']->add(new Commands\LdapUserAddCommand());
+$app['console']->add(new Commands\LdapUserRemoveCommand());
 //$application->add(new Commands\LdapUserDisableCommand());
-$application->add(new Commands\LdapUserGroupCommand());
+$app['console']->add(new Commands\LdapUserGroupCommand());
 
-$application->run();
+$app['console']->run();

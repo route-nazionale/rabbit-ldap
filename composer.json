@@ -7,7 +7,8 @@
         "silex/silex": "1.2.*@dev",
         "symfony/twig-bridge": "2.6.*@dev",
         "doctrine/dbal": "2.2.*",
-        "monolog/monolog": "1.10.*@dev"
+        "monolog/monolog": "1.10.*@dev",
+        "knplabs/console-service-provider": "dev-master"
     },
     "autoload": {
         "psr-0": {
