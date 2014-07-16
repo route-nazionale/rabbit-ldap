@@ -49,9 +49,9 @@ class LdapReceiver
 
                 $arguments = array(
                     'command' => $stringCommand,
-                    'username'    => $data->username,
-                    'name'    => $data->name,
-                    'password'    => $data->password,
+                    'username'    => $data->fields->cu,
+                    'name'    => $data->fields->nome,
+                    'password'    => $data->fields->data_nascita,
                     '--type'    => $data->type,
                 );
 

@@ -79,31 +79,27 @@ $app->post("/login", function() use ($app){
         return new JsonResponse(null,401);
     }
 
-    $decodedPassword = false;
-    if ($encodedPassword) {
-        $decodedPassword = $app['aes.encoder']->decode($encodedPassword);
+    try {
+        $decodedPassword = false;
 
-        try {
+        if ($encodedPassword) {
+            $decodedPassword = $app['aes.encoder']->decode($encodedPassword);
+
             $response = $app['auth.checker']->attemptLogin($username, $decodedPassword, $group);
 
-        } catch (\Exception $e) {
-            return new JsonResponse(["error" => $e->getMessage()], 500);
-        }
+        } else {
 
-    } else {
-        $decodedBirthdate = false;
-        if( $encodedBirthdate) {
-            $decodedBirthdate = $app['aes.encoder']->decode($encodedBirthdate);
+            $decodedBirthdate = false;
 
-            try {
+            if( $encodedBirthdate) {
+
+                $decodedBirthdate = $app['aes.encoder']->decode($encodedBirthdate);
+
                 $response = $app['auth.checker']->attemptLoginWithBirthdate($username, $decodedBirthdate, $group);
-
-            } catch (\Exception $e) {
-                return new JsonResponse(["error" => $e->getMessage()], 500);
             }
-
         }
-
+    } catch (\Exception $e) {
+        return new JsonResponse(["error" => $e->getMessage()], 500);
     }
 
     if ($response) {
@@ -156,6 +152,7 @@ $app->error(function (\Exception $e, $code) use ($app) {
         );
 
         return new Response( $app['twig']->render('404.html.twig', $data), 404);
+
     } elseif ($code == 500) {
 
         $data = array(
@@ -165,7 +162,6 @@ $app->error(function (\Exception $e, $code) use ($app) {
     }
 
     return new Response('Spiacenti, c\'è stato un problema.', $code);
-
 });
 
 return $app;
