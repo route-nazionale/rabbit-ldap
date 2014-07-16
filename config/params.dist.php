@@ -14,6 +14,11 @@ define('RABBITMQ_USER', 'guest');
 define('RABBITMQ_PASS', 'guest');
 define('RABBITMQ_VHOST', '/');
 
+define('RABBITMQ_SSL', false);
+define('RABBITMQ_SSL_CAPATH', '/path/to/certs');
+define('RABBITMQ_SSL_CAFILE', '/path/to/cacert.pem');
+define('RABBITMQ_SSL_VERIFY_PEER', true);
+
 //If this is enabled you can see AMQP output on the CLI
 define('AMQP_DEBUG', false);
 

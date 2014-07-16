@@ -7,9 +7,6 @@
 
 namespace Rn2014\Command;
 
-use Rn2014\AESEncoder;
-use Rn2014\Ldap\LdapCommander;
-use Rn2014\Ldap\LdapRawCaller;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,7 +14,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use PhpAmqpLib\Connection\AMQPConnection;
-use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Connection\AMQPSSLConnection;
+
+use Rn2014\AESEncoder;
 use Rn2014\Queue\LdapReceiver;
 
 class RabbitLdapReceiverCommand extends Command
@@ -38,14 +37,7 @@ class RabbitLdapReceiverCommand extends Command
                 'consumer_tag',
                 InputArgument::OPTIONAL,
                 'Consumer tag',
-                'ldap_receiver'
-            )
-            ->addOption(
-                'stop-word',
-                'x',
-                InputOption::VALUE_REQUIRED,
-                'Quante è la parola per terminare?',
-                'quit'
+                'humen.insert'
             );
     }
 
@@ -53,13 +45,13 @@ class RabbitLdapReceiverCommand extends Command
     {
         $queue_name = $input->getArgument('queue_name');
         $consumer_tag = $input->getArgument('consumer_tag');
-        $stop_word = $input->getOption('stop-word');
 
 // server
         $host = RABBITMQ_HOST;
         $port = RABBITMQ_PORT;
         $user = RABBITMQ_USER;
         $password = RABBITMQ_PASS;
+        $vhost = RABBITMQ_VHOST;
 
         if (AES_IV && AES_KEY) {
 
@@ -96,7 +88,20 @@ class RabbitLdapReceiverCommand extends Command
 
         $ldapReceiver = new LdapReceiver($this->getApplication(), $output, $aesEncoder);
 
-        $connection = new AMQPConnection($host, $port, $user, $password);
+        if (RABBITMQ_SSL) {
+
+            $ssl_options = array(
+                'capath' => RABBITMQ_SSL_CAPATH,
+                'cafile' => RABBITMQ_SSL_CAFILE,
+                'verify_peer' => RABBITMQ_SSL_VERIFY_PEER,
+            );
+
+            $connection = new AMQPSSLConnection($host, $port, $user, $password, $vhost, $ssl_options);
+
+        } else {
+            $connection = new AMQPConnection($host, $port, $user, $password, $vhost);
+        }
+
         $output->writeln("connection opened");
 
         $channel = $connection->channel();

@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use PhpAmqpLib\Connection\AMQPConnection;
+use PhpAmqpLib\Connection\AMQPSSLConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
 class RabbitTestSendCommand extends Command
@@ -34,14 +35,7 @@ class RabbitTestSendCommand extends Command
                 'routing_key',
                 InputArgument::OPTIONAL,
                 'Routing key',
-                'humen.change'
-            )
-            ->addOption(
-                'stop-word',
-                'x',
-                InputOption::VALUE_REQUIRED,
-                'Inserire la parola corretta per terminare il receiver',
-                false
+                'humen.insert'
             );
     }
 
@@ -49,36 +43,41 @@ class RabbitTestSendCommand extends Command
     {
         $exchange_name  = $input->getArgument('exchange_name');
         $routing_key = $input->getArgument('routing_key');
-        $stop_word = $input->getOption('stop-word');
 
 // server
         $host = RABBITMQ_HOST;
         $port = RABBITMQ_PORT;
         $user = RABBITMQ_USER;
         $password = RABBITMQ_PASS;
+        $vhost = RABBITMQ_VHOST;
 
 // sender specific
 
-        $connection = new AMQPConnection($host, $port, $user, $password);
+        if (RABBITMQ_SSL) {
+
+            $ssl_options = array(
+                'capath' => RABBITMQ_SSL_CAPATH,
+                'cafile' => RABBITMQ_SSL_CAFILE,
+                'verify_peer' => RABBITMQ_SSL_VERIFY_PEER,
+            );
+            $connection = new AMQPSSLConnection($host, $port, $user, $password, $vhost, $ssl_options);
+
+        } else {
+            $connection = new AMQPConnection($host, $port, $user, $password, $vhost);
+        }
+
         $output->writeln("connection opened");
 
         $channel = $connection->channel();
         $output->writeln("channel opened");
 
-        if ($stop_word ) {
+        $user = new \StdClass;
+        $user->name = "prova prova";
+        $user->username = "testlancio";
+        $user->password = "123123123";
+        $user->type= "test";
 
-            $msg = $this->createMessage($stop_word);
-        } else {
-            $user = new \StdClass;
-            $user->name = "prova prova";
-            $user->username = "testlancio";
-            $user->password = "123123123";
-            $user->type= "test";
-            $message = new \stdClass();
-            $message->operation = "add_user";
-            $message->data = $user;
-            $msg = $this->createMessage($message);
-        }
+        $msg = $this->createMessage($user);
 
         $channel->basic_publish($msg, $exchange_name, $routing_key);
 
