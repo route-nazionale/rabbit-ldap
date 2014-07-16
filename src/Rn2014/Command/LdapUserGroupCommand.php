@@ -18,6 +18,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LdapUserGroupCommand extends Command
 {
+    public function __construct($ldap, $name = null)
+    {
+        $this->ldap = $ldap;
+
+        parent::__construct($name);
+    }
+
     protected function configure()
     {
         $this
@@ -47,23 +54,9 @@ class LdapUserGroupCommand extends Command
         $group = $input->getArgument('group');
         $remove = $input->getOption('remove');
 
-        $params = array(
-            'hostname'      => LDAP_HOST,
-            'port'          => LDAP_PORT,
-            'security'      => LDAP_SECURITY,
-            'base_dn'       => LDAP_BASE_DN,
-            'options'       => [LDAP_OPT_PROTOCOL_VERSION => LDAP_VERSION],
-            'admin'         => [
-                'dn'        => LDAP_ADMIN_DN,
-                'password'  => LDAP_ADMIN_PASSWORD,
-            ]
-        );
-
         try {
-            $ldapCaller = new LdapRawCaller($params);
-            $ldap = new LdapCommander($ldapCaller);
 
-            $response = $ldap->userChangeGroup($username, $group, !$remove);
+            $response = $this->ldap->userChangeGroup($username, $group, !$remove);
 
             $output->writeln("logged: " . ($response['response'] ? "OK":"KO"));
 

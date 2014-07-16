@@ -18,6 +18,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LdapLoginCommand extends Command
 {
+    public function __construct($ldap, $name = null)
+    {
+        $this->ldap = $ldap;
+
+        parent::__construct($name);
+    }
+
     protected function configure()
     {
         $this
@@ -46,19 +53,8 @@ class LdapLoginCommand extends Command
         $password = $input->getArgument('password');
         $group = $input->getArgument('group');
 
-        $params = array(
-            'hostname'      => LDAP_HOST,
-            'port'          => LDAP_PORT,
-            'security'      => LDAP_SECURITY,
-            'base_dn'       => LDAP_BASE_DN,
-            'options'       => [LDAP_OPT_PROTOCOL_VERSION => LDAP_VERSION]
-        );
-
         try {
-            $ldapCaller = new LdapRawCaller($params);
-            $ldap = new LdapCommander($ldapCaller);
-
-            $output->writeln("logged: " . ($ldap->attemptLogin($username, $password, $group) ? "OK":"KO"));
+            $output->writeln("logged: " . ($this->ldap->attemptLogin($username, $password, $group) ? "OK":"KO"));
 
         } catch (\Exception $e) {
 

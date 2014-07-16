@@ -51,18 +51,18 @@ $app['rabbit']= $app->share(function() use ($app) {
     return $connection;
 });
 
-$app['console']->add(new Commands\RabbitSetupCommand);
-$app['console']->add(new Commands\RabbitMonitorSetupCommand);
+$app['console']->add(new Commands\RabbitSetupCommand($app['rabbit']));
+$app['console']->add(new Commands\RabbitMonitorSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitTestSendCommand($app['rabbit'], $app['aes.encoder']));
-$app['console']->add(new Commands\RabbitLdapSetupCommand);
+$app['console']->add(new Commands\RabbitLdapSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitLdapReceiverCommand($app['rabbit'], $app['aes.encoder']));
 
-$app['console']->add(new Commands\LdapLoginCommand());
-$app['console']->add(new Commands\LdapTestLoginCommand());
-$app['console']->add(new Commands\LdapChangePasswordCommand());
-$app['console']->add(new Commands\LdapUserAddCommand());
+$app['console']->add(new Commands\LdapLoginCommand($app['ldap']));
+$app['console']->add(new Commands\LdapTestLoginCommand($app['ldap']));
+$app['console']->add(new Commands\LdapChangePasswordCommand($app['ldap.admin']));
+$app['console']->add(new Commands\LdapUserAddCommand($app['ldap.admin']));
 //$app['console']->add(new Commands\LdapUserRemoveCommand());
 //$application->add(new Commands\LdapUserDisableCommand());
-$app['console']->add(new Commands\LdapUserGroupCommand());
+$app['console']->add(new Commands\LdapUserGroupCommand($app['ldap']));
 
 $app['console']->run();

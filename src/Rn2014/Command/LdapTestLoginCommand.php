@@ -17,6 +17,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LdapTestLoginCommand extends Command
 {
+    public function __construct($ldap, $name = null)
+    {
+        $this->ldap = $ldap;
+
+        parent::__construct($name);
+    }
+
     protected function configure()
     {
         $this
@@ -39,23 +46,9 @@ class LdapTestLoginCommand extends Command
         $username  = $input->getArgument('username');
         $password = $input->getArgument('password');
 
-        $params = [
-            'hostname'      => LDAP_HOST,
-            'port'          => LDAP_PORT,
-            'security'      => LDAP_SECURITY,
-            'base_dn'       => LDAP_BASE_DN,
-            'options'       => [LDAP_OPT_PROTOCOL_VERSION => LDAP_VERSION],
-//            'admin'         => [
-//                'dn'        => LDAP_ADMIN_DN,
-//                'password'  => LDAP_ADMIN_PASSWORD,
-//            ]
-        ];
-
         try {
-            $ldapCaller = new LdapRawCaller($params);
-            $ldap = new LdapCommander($ldapCaller);
 
-            $output->writeln("result: " . ($ldap->testLogin($username, $password) ? "OK" : "KO"));
+            $output->writeln("result: " . ($this->ldap->testLogin($username, $password) ? "OK" : "KO"));
 
         } catch (\Exception $e) {
 

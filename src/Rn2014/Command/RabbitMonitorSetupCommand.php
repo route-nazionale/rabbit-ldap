@@ -17,6 +17,13 @@ use PhpAmqpLib\Connection\AMQPConnection;
 
 class RabbitMonitorSetupCommand extends Command
 {
+    public function __construct($rabbit, $name = null)
+    {
+        $this->rabbit = $rabbit;
+
+        parent::__construct($name);
+    }
+
     protected function configure()
     {
         $this
@@ -49,13 +56,6 @@ class RabbitMonitorSetupCommand extends Command
         $queue_name = $input->getArgument('queue_name');
         $binding_key = $input->getArgument('binding_key');
 
-// COMMON
-
-// server
-        $host = RABBITMQ_HOST;
-        $port = RABBITMQ_PORT;
-        $user = RABBITMQ_USER;
-        $password = RABBITMQ_PASS;
 
 // RECEIVER SPECIFIC
 //        $queue_name = 'monitor';
@@ -65,10 +65,9 @@ class RabbitMonitorSetupCommand extends Command
         $auto_delete = false;
 //        $binding_key = '*.*';
 
-        $connection = new AMQPConnection($host, $port, $user, $password);
         $output->writeln("connection opened");
 
-        $channel = $connection->channel();
+        $channel = $this->rabbit->channel();
         $output->writeln("channel opened");
         $channel->queue_declare($queue_name, $passive, $durable, $exclusive, $auto_delete);
         $output->writeln("queue declared");

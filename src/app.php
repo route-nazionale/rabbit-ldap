@@ -88,4 +88,24 @@ $app['ldap'] = $app->share(function() use ($app) {
     return $ldap;
 });
 
+$app['ldap.admin'] = $app->share(function() use ($app) {
+
+    $params = [
+        'hostname'      => LDAP_HOST,
+        'port'          => LDAP_PORT,
+        'security'      => LDAP_SECURITY,
+        'base_dn'       => LDAP_BASE_DN,
+        'options'       => [LDAP_OPT_PROTOCOL_VERSION => LDAP_VERSION],
+        'admin'         => [
+            'dn'        => LDAP_ADMIN_DN,
+            'password'  => LDAP_ADMIN_PASSWORD,
+        ]
+    ];
+
+    $ldapCaller = new LdapRawCaller($params);
+    $ldap = new LdapCommander($ldapCaller);
+
+    return $ldap;
+});
+
 return $app;

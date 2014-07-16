@@ -17,6 +17,13 @@ use PhpAmqpLib\Connection\AMQPConnection;
 
 class RabbitSetupCommand extends Command
 {
+    public function __construct($rabbit, $name = null)
+    {
+        $this->rabbit = $rabbit;
+
+        parent::__construct($name);
+    }
+
     protected function configure()
     {
         $this
@@ -39,26 +46,17 @@ class RabbitSetupCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-//        $exchange_name = 'application';
-//        $exchange_type = 'topic';
-
         $exchange_name = $input->getArgument('exchange_name');
         $exchange_type = $input->getArgument('exchange_type');
 
-// server
-        $host = RABBITMQ_HOST;
-        $port = RABBITMQ_PORT;
-        $user = RABBITMQ_USER;
-        $password = RABBITMQ_PASS;
 // common
         $passive = false;
         $durable = true;
         $auto_delete = false;
 
-        $connection = new AMQPConnection($host, $port, $user, $password);
         $output->writeln("connection opened");
 
-        $channel = $connection->channel();
+        $channel = $this->rabbit->channel();
         $output->writeln("channel opened");
 
 // EXCHANGE DEFINITION
@@ -75,7 +73,7 @@ class RabbitSetupCommand extends Command
         $channel->close();
         $output->writeln("channel closed");
 
-        $connection->close();
+        $this->rabbit->close();
         $output->writeln("connection closed");
 
     }
