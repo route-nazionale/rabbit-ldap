@@ -10,10 +10,8 @@ namespace Rn2014\Queue;
 use Rn2014\AESEncoder;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Console\Output\NullOutput;
-use Symfony\Component\Console\Output\OutputInterface
-    ;
+use Symfony\Component\Console\Output\OutputInterface;
+
 class Receiver
 {
     protected $app;
