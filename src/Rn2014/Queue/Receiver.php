@@ -66,18 +66,7 @@ class Receiver
                 );
 
                 break;
-            case 'remove_user':
-
-                $stringCommand = 'ldap:user:remove';
-
-                $arguments = array(
-                    'command' => $stringCommand,
-                    'username'    => $data->username,
-                    'password'    => $data->password,
-                );
-
-                break;
-            case 'humen.modify.pass':
+            case 'humen.change.pass':
 
                 $stringCommand = 'ldap:change:password';
 
@@ -89,7 +78,18 @@ class Receiver
                 );
 
                 break;
-            case 'remove_group':
+            case 'humen.reset.pass':
+
+                $stringCommand = 'ldap:reset:password';
+
+                $arguments = array(
+                    'command' => $stringCommand,
+                    'username'    => $data->username,
+                    'password'    => $data->password,
+                );
+
+                break;
+            case 'humen.group.remove':
 
                 $stringCommand = 'ldap:user:group';
 
@@ -101,7 +101,7 @@ class Receiver
                 );
 
                 break;
-            case 'add_group':
+            case 'humen.group.add':
 
                 $stringCommand = 'ldap:user:group';
 
@@ -112,6 +112,17 @@ class Receiver
                 );
 
                 break;
+//            case 'humen.remove':
+//
+//                $stringCommand = 'ldap:user:remove';
+//
+//                $arguments = array(
+//                    'command' => $stringCommand,
+//                    'username'    => $data->username,
+//                    'password'    => $data->password,
+//                );
+//
+//                break;
 
             default:
                 return;
