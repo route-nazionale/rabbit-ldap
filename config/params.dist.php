@@ -11,7 +11,7 @@ define('HTTPS_REQUIRED', false);
 
 /**
  * (ldap|db)
- * definisce se utilizzare ldap o db per controllare i dati per l'autenticazione
+ * definisce se utilizzare ldap o temp (db temporaneo) per controllare i dati per l'autenticazione
  */
 define('LOGIN_METHOD', 'ldap');
 
@@ -77,3 +77,9 @@ define('MYSQL_DB_LDAP', 'database');
 define('MYSQL_USER_LDAP', 'username');
 define('MYSQL_PASS_LDAP', 'password');
 
+/**
+ * DB per l'autenticaione basata su data di nascita
+ */
+define('MYSQL_DB_AQUILE', 'database');
+define('MYSQL_USER_AQUILE', 'username');
+define('MYSQL_PASS_AQUILE', 'password');

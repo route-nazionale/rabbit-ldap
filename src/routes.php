@@ -39,7 +39,7 @@ $app->post("/", function() use ($app){
     $password = $app['request']->get('password', null);
 
     try {
-        $response = $app['auth.checker']->testLogin($username, $password);
+        $response = $app['auth']->testLogin($username, $password);
 
     } catch (\Exception $e) {
 
@@ -85,7 +85,7 @@ $app->post("/login", function() use ($app){
         if ($encodedPassword) {
             $decodedPassword = $app['aes.encoder']->decode($encodedPassword);
 
-            $response = $app['auth.checker']->attemptLogin($username, $decodedPassword, $group);
+            $response = $app['auth']->attemptLogin($username, $decodedPassword, $group);
 
         } else {
 
@@ -95,7 +95,7 @@ $app->post("/login", function() use ($app){
 
                 $decodedBirthdate = $app['aes.encoder']->decode($encodedBirthdate);
 
-                $response = $app['auth.checker']->attemptLoginWithBirthdate($username, $decodedBirthdate, $group);
+                $response = $app['auth']->attemptLoginWithBirthdate($username, $decodedBirthdate, $group);
             }
         }
     } catch (\Exception $e) {

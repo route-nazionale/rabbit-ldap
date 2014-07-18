@@ -12,7 +12,8 @@ use Monolog\Handler\StreamHandler;
 use Rn2014\AESEncoder;
 use Rn2014\Ldap\LdapRawCaller;
 use Rn2014\Ldap\LdapCommander;
-use Rn2014\TemporaryLoginChecker;
+use Rn2014\Auth\Auth;
+use Rn2014\Auth\TemporaryAuth;
 
 $app->register(new Providers\TwigServiceProvider(), [
     'twig.path' => __DIR__.'/../views',
@@ -46,6 +47,15 @@ $app->register(new Providers\DoctrineServiceProvider(), [
             'dbname'     => MYSQL_DB_LDAP,
             'user'     => MYSQL_USER_LDAP,
             'password'     => MYSQL_PASS_LDAP,
+            'charset'     => 'utf8',
+        ],
+        'aquile_randagie' => [
+            'driver'   => 'pdo_mysql',
+            'host'     => MYSQL_HOST,
+            'port'     => MYSQL_PORT,
+            'dbname'     => MYSQL_DB_AQUILE,
+            'user'     => MYSQL_USER_AQUILE,
+            'password'     => MYSQL_PASS_AQUILE,
             'charset'     => 'utf8',
         ],
     ],
@@ -120,12 +130,12 @@ $app['ldap.admin'] = $app->share(function() use ($app) {
     return $ldap;
 });
 
-$app['auth.checker'] = $app->share(function() use ($app) {
+$app['auth'] = $app->share(function() use ($app) {
     switch (LOGIN_METHOD) {
         case 'ldap':
-            return $app['ldap'];
-        case 'db':
-            return new TemporaryLoginChecker($app['dbs']['ldap']);
+            return new Auth($app['dbs']['aquile_randagie'], $app['ldap']);
+        case 'temp':
+            return new TemporaryAuth($app['dbs']['ldap']);
         default:
             throw new \Exception ("Login method not correct");
     }

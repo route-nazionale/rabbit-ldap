@@ -34,6 +34,11 @@ class LdapCommander {
         return $result;
     }
 
+    public function isUserInGroup($username, $group)
+    {
+        return $this->ldap->isUserInGroup($username, $group);
+    }
+
     public function attemptLogin($username, $password, $group)
     {
         $this->ldap->bindAnonymously();
