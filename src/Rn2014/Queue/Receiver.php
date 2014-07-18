@@ -7,7 +7,6 @@
 
 namespace Rn2014\Queue;
 
-use PhpAmqpLib\Message\AMQPMessage;
 use Rn2014\AESEncoder;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -15,12 +14,15 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface
     ;
-class LdapReceiver
+class Receiver
 {
     protected $app;
     protected $output;
     protected $aesEncoder;
 
+    /**
+     * @var array campi da decodificare
+     */
     public static $codificatedFields = [
         'password',
         'old_password'
@@ -36,7 +38,7 @@ class LdapReceiver
     public function processMessage($req)
     {
         echo "\n--------\n";
-        echo var_dump($req->body,true);
+        echo var_dump($req->body, true);
         echo "\n--------\n";
 
         $data = $this->decodeMessage($req->body);
@@ -52,8 +54,9 @@ class LdapReceiver
                 } elseif ($data->fields->rs) {
                     $type = 'rs';
                 } else {
-                    $type ='test';
+                    throw new \Exception("non è oneteam non è rsa.. ma allora che cosa è?");
                 }
+
                 $arguments = array(
                     'command' => $stringCommand,
                     'username'    => $data->fields->cu,
@@ -74,7 +77,7 @@ class LdapReceiver
                 );
 
                 break;
-            case 'change_password':
+            case 'humen.modify.pass':
 
                 $stringCommand = 'ldap:change:password';
 
@@ -109,10 +112,7 @@ class LdapReceiver
                 );
 
                 break;
-//            case 'test_login':
-//                break;
-//            case 'login':
-//                break;
+
             default:
                 return;
         }
@@ -132,11 +132,6 @@ class LdapReceiver
             }
         }
         return $message;
-    }
-
-    protected function decode($value)
-    {
-        return $value;
     }
 
     public static function shutdown($channel, $conn)

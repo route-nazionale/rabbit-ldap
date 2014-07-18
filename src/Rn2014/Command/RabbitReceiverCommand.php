@@ -13,9 +13,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Rn2014\Queue\LdapReceiver;
+use Rn2014\Queue\Receiver;
 
-class RabbitLdapReceiverCommand extends Command
+class RabbitReceiverCommand extends Command
 {
     public function __construct($rabbit, $encoder, $name = null)
     {
@@ -28,7 +28,7 @@ class RabbitLdapReceiverCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('rabbit:ldap:receiver')
+            ->setName('rabbit:receiver')
             ->setDescription('avvia l\'ascoltatore della coda ldap')
             ->addArgument(
                 'queue_name',
@@ -50,7 +50,7 @@ class RabbitLdapReceiverCommand extends Command
         $queue_name = $input->getArgument('queue_name');
         $consumer_tag = $input->getArgument('consumer_tag');
 
-        $ldapReceiver = new LdapReceiver($this->getApplication(), $output, $this->encoder);
+        $receiver = new Receiver($this->getApplication(), $output, $this->encoder);
 
         $output->writeln("connection opened");
 
@@ -60,9 +60,9 @@ class RabbitLdapReceiverCommand extends Command
         /* $prefetch_size, $prefetch_count, $a_global */
         $channel->basic_qos(null, 1, null);
 
-        $channel->basic_consume($queue_name, $consumer_tag, false, false, false, false, [$ldapReceiver, 'processMessage']);
+        $channel->basic_consume($queue_name, $consumer_tag, false, false, false, false, [$receiver, 'processMessage']);
 
-        register_shutdown_function(['Rn2014\Queue\LdapReceiver', 'shutdown'], $channel, $this->rabbit);
+        register_shutdown_function(['Rn2014\Queue\Receiver', 'shutdown'], $channel, $this->rabbit);
 
         // Loop as long as the channel has callbacks registered
         while(count($channel->callbacks)) {

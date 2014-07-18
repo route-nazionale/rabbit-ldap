@@ -55,11 +55,12 @@ $app['console']->add(new Commands\RabbitSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitMonitorSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitTestSendCommand($app['rabbit'], $app['aes.encoder']));
 $app['console']->add(new Commands\RabbitLdapSetupCommand($app['rabbit']));
-$app['console']->add(new Commands\RabbitLdapReceiverCommand($app['rabbit'], $app['aes.encoder']));
+$app['console']->add(new Commands\RabbitReceiverCommand($app['rabbit'], $app['aes.encoder']));
 
 $app['console']->add(new Commands\LdapLoginCommand($app['ldap']));
 $app['console']->add(new Commands\LdapTestLoginCommand($app['ldap']));
 $app['console']->add(new Commands\LdapChangePasswordCommand($app['ldap.admin']));
+$app['console']->add(new Commands\LdapResetPasswordCommand($app['ldap']));
 $app['console']->add(new Commands\LdapUserAddCommand($app['ldap.admin']));
 //$app['console']->add(new Commands\LdapUserRemoveCommand());
 //$application->add(new Commands\LdapUserDisableCommand());

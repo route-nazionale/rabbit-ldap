@@ -80,7 +80,6 @@ class LdapCommander {
                 break;
         }
 
-
         if (!is_file($this->path_scripts  . $script)) {
             return ['response' => false, 'errors' => [
                 "Script [{$this->path_scripts}{$script}] not found",
@@ -107,6 +106,28 @@ class LdapCommander {
         $response = $this->ldap->changePassword($username, $old_password, $password);
 
         return $response;
+    }
+
+    public function resetPassword($username, $password)
+    {
+        $script = "change_pass.sh";
+
+        if (!is_file($this->path_scripts  . $script)) {
+            return ['response' => false, 'errors' => [
+                "Script [{$this->path_scripts}{$script}] not found",
+                $this->path_scripts,
+            ]];
+        }
+
+        $params = sprintf(
+            ' "%s" "%s" "%s" ',
+            escapeshellarg($username),
+            escapeshellarg($password)
+        );
+
+        exec($this->path_scripts  . $script . $params, $output);
+
+        return 0 === count($output)? ['response' => true] : ['response' => false, 'errors' => $output];
     }
 
     public function userChangeGroup($username, $group, $add = true)
