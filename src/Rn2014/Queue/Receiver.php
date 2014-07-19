@@ -136,7 +136,7 @@ class Receiver
         $message = json_decode($message);
 
         foreach ($message as $field => $value) {
-            if (in_array($field, self::$codificatedFields)) {
+            if (in_array(self::$codificatedFields, $field)) {
                 $message->$field = $this->aesEncoder->decode($value);
             }
         }
