@@ -34,7 +34,7 @@ class LdapUserAddCommand extends Command
                 'type',
                 't',
                 InputOption::VALUE_REQUIRED,
-                'type of user (oneteam|rs|test)',
+                'type of user (oneteam|rs|rscapi|lab|extra)',
                 "oneteam"
             )
             ->addArgument(

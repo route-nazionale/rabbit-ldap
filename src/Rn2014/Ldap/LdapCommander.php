@@ -72,11 +72,20 @@ class LdapCommander {
             case 'rs':
                 $script = "add_rs_user.sh";
                 break;
+            case 'rscapi':
+                $script = "add_rscapi_user.sh";
+                break;
+            case 'lab':
+                $script = "add_lab_user.sh";
+                break;
+            case 'extra':
+                $script = "add_extra_user.sh";
+                break;
             case 'test':
                 $script = "add_test_user.sh";
                 break;
             default:
-                throw new \Exception("group Type [$groupType] not found! (oneteam|rs) ");
+                throw new \Exception("group Type [$groupType] not found! (oneteam|rs|rscapi|lab|extra) ");
                 break;
         }
 
