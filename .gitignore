@@ -3,3 +3,4 @@ vendor
 !config/params.dist.php
 config/
 bin
+data/test.user.js

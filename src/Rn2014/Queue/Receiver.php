@@ -8,6 +8,7 @@
 namespace Rn2014\Queue;
 
 use Rn2014\AESEncoder;
+use SebastianBergmann\Exporter\Exception;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -47,13 +48,7 @@ class Receiver
             case 'humen.insert':
                 $stringCommand = 'ldap:user:add';
 
-                if ($data->fields->oneteam) {
-                    $type = 'oneteam';
-                } elseif ($data->fields->rs) {
-                    $type = 'rs';
-                } else {
-                    throw new \Exception("non è oneteam non è rsa.. ma allora che cosa è?");
-                }
+                $type = $this->getType($data->fields);
 
                 $arguments = array(
                     'command' => $stringCommand,
@@ -149,4 +144,57 @@ class Receiver
         $conn->close();
     }
 
+
+    public function getType($user)
+    {
+        switch ($user->idgruppo) {
+            //extra
+            case 'SER0':
+            //fornitori
+            case 'SER4':
+                return 'extra';
+                break;
+            //lab
+            case 'SER1':
+                return 'lab';
+                break;
+            //oneteam
+            case 'SER2':
+                return 'oneteam';
+                break;
+        }
+
+        switch ($user->ruolo) {
+            //capiclan e annessi
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+                return 'rscapi';
+                break;
+            //animatori lab
+            case '11':
+                return 'lab';
+                break;
+            case '7':
+                return 'rs';
+                break;
+            case '8':
+                return 'oneteam';
+                break;
+            // non definito
+            case '99':
+            // kinderheim
+            case '9':
+            // coniugi
+            case '10':
+            // accompagnatori
+            case '12':
+            default:
+                throw new Exception("tipo utente non riconosciuto [cu: {$user->cu}| ruolo: {$user->ruolo}| idgruppo: {$user->idgruppo}]");
+        }
+    }
 }
