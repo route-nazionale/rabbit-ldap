@@ -123,6 +123,15 @@ $app->post("/login", function() use ($app){
 })
     ->before($checkJsonRequest);
 
+$app->get("/users/{username}/groups", function($username) use ($app){
+
+    $groups = $app['ldap']->getGroups($username);
+
+    return $app->json($groups);
+})
+    ->before($checkJsonRequest);
+
+
 if ($app['debug']) {
 
     $app->get("/encode/{password}", function($password) use ($app){

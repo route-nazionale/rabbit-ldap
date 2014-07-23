@@ -51,7 +51,7 @@ class Receiver
                     $type = $this->getType($data->fields);
                     $this->app['ldap']->setPathScripts(LDAP_PATH_SCRIPTS);
 
-                    $result =  $this->app['ldap']->addUser($type, $data->fields->cu, $data->fields->nome, $data->fields->data_nascita);
+                    $result =  $this->app['ldap.admin']->addUser($type, $data->fields->cu, $data->fields->nome, $data->fields->data_nascita);
 
                     $this->app['monolog.humen']->addNotice("user inserted", [
                         'routing_key' => $req->get('routing_key'),
@@ -93,7 +93,7 @@ class Receiver
             case 'humen.password':
 
                 try {
-                    $result = $this->app['ldap']->resetPassword($data->username, $data->password);
+                    $result = $this->app['ldap.admin']->resetPassword($data->username, $data->password);
 
                     $this->app['monolog.humen']->addNotice("reset password", [
                         'routing_key' => $req->get('routing_key'),
@@ -111,7 +111,7 @@ class Receiver
             case 'humen.groups':
                 foreach ($data->add as $group) {
                     try {
-                        $result = $this->app['ldap']->userChangeGroup($data->username, $group, true);
+                        $result = $this->app['ldap.admin']->userChangeGroup($data->username, $group, true);
 
                         $this->app['monolog.humen']->addNotice("group added", [
                             'routing_key' => $req->get('routing_key'),
@@ -127,11 +127,12 @@ class Receiver
                 };
                 foreach ($data->remove as $group) {
                     try {
-                        $this->app['ldap']->userChangeGroup($data->username, $group, true);
+                        $result = $this->app['ldap.admin']->userChangeGroup($data->username, $group, true);
 
                         $this->app['monolog.humen']->addNotice("group subbed", [
                             'routing_key' => $req->get('routing_key'),
                             'data' => $data,
+                            'result' => $result,
                         ]);
                     } catch (\Exception $e) {
                         $this->app['monolog.humen']->addError($e->getMessage(), [

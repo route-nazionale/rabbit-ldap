@@ -173,4 +173,23 @@ class LdapCommander {
     {
         $this->ldap->changeUser($username, 1 ) === 1 ? ['response' => true]: ['response' => false, 'errors' => ['not modified']];
     }
+
+    public function getUserGroups($username)
+    {
+        $this->ldap->bindAdmin();
+
+        $response = $this->ldap->getUserGroups($username);
+
+        return $response;
+    }
+
+    public function getGroups()
+    {
+        $this->ldap->bindAdmin();
+
+        $response = $this->ldap->getGroups();
+
+        return $response;
+    }
+
 }

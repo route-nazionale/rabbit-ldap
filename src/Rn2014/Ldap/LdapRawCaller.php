@@ -105,6 +105,34 @@ class LdapRawCaller {
 
     }
 
+    public function getGroups()
+    {
+        $groups = [];
+        $filter = "(cn=*)";
+        $dnGroup = "ou=Groups," . $this->baseDn;
+        $result = $this->search($dnGroup, $filter);
+
+        for ($i=0; $i < $result['count']; $i++) {
+            $groups[] = $result[$i]['cn'][0];
+        }
+
+        return $groups;
+    }
+
+    public function getUserGroups($username)
+    {
+        $groups = [];
+        $filter = "(memberUid=$username)";
+        $dnGroup = "ou=Groups," . $this->baseDn;
+        $result = $this->search($dnGroup, $filter);
+
+        for ($i=0; $i < $result['count']; $i++) {
+            $groups[] = $result[$i]['cn'][0];
+        }
+
+        return $groups;
+    }
+
     public function isUserInGroup($username, $group)
     {
         $filter = "(&(cn=$group)(memberUid=$username))";

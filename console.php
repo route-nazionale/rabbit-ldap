@@ -64,6 +64,8 @@ $app['console']->add(new Commands\LdapResetPasswordCommand($app['ldap']));
 $app['console']->add(new Commands\LdapUserAddCommand($app['ldap.admin']));
 //$app['console']->add(new Commands\LdapUserRemoveCommand());
 //$application->add(new Commands\LdapUserDisableCommand());
-$app['console']->add(new Commands\LdapUserGroupCommand($app['ldap']));
+$app['console']->add(new Commands\LdapUserGroupCommand($app['ldap.admin']));
+$app['console']->add(new Commands\LdapUserGroupsCommand($app['ldap.admin']));
+$app['console']->add(new Commands\LdapGroupsCommand($app['ldap.admin']));
 
 $app['console']->run();
