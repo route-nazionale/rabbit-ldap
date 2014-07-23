@@ -71,6 +71,12 @@ define('MYSQL_USER_AES', 'username');
 define('MYSQL_PASS_AES', 'password');
 
 /**
+ * LDAP accesso al db per scrivere i gruppi posix
+ */
+define('MYSQL_DB_LDAP_POSIX', 'database');
+define('MYSQL_USER_LDAP_POSIX', 'username');
+define('MYSQL_PASS_LDAP_POSIX', 'password');
+/**
  * LDAP accesso temporaneo per l'autenticaione, in attesa di sistemare ldap
  */
 define('MYSQL_DB_LDAP', 'database');

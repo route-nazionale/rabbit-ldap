@@ -49,6 +49,15 @@ $app->register(new Providers\DoctrineServiceProvider(), [
             'password'     => MYSQL_PASS_LDAP,
             'charset'     => 'utf8',
         ],
+        'posix' => [
+            'driver'   => 'pdo_mysql',
+            'host'     => MYSQL_HOST,
+            'port'     => MYSQL_PORT,
+            'dbname'     => MYSQL_DB_LDAP_POSIX,
+            'user'     => MYSQL_USER_LDAP,
+            'password'     => MYSQL_PASS_LDAP,
+            'charset'     => 'utf8',
+        ],
         'aquile_randagie' => [
             'driver'   => 'pdo_mysql',
             'host'     => MYSQL_HOST,
@@ -66,6 +75,16 @@ $app['monolog.login.level'] = Logger::INFO;
 $app['monolog.login'] = $app->share(function ($app) {
     $log = new $app['monolog.logger.class']('login');
     $handler = new StreamHandler($app['monolog.login.logfile'], $app['monolog.login.level']);
+    $log->pushHandler($handler);
+
+    return $log;
+});
+
+$app['monolog.humen.logfile'] = __DIR__ . '/../logs/humen.log';
+$app['monolog.humen.level'] = Logger::INFO;
+$app['monolog.humen'] = $app->share(function ($app) {
+    $log = new $app['monolog.logger.class']('humen');
+    $handler = new StreamHandler($app['monolog.humen.logfile'], $app['monolog.humen.level']);
     $log->pushHandler($handler);
 
     return $log;

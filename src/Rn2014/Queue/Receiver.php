@@ -46,65 +46,125 @@ class Receiver
 
         switch ($req->get('routing_key')) {
             case 'humen.insert':
-                $stringCommand = 'ldap:user:add';
 
-                $type = $this->getType($data->fields);
+                try {
+                    $type = $this->getType($data->fields);
+                    $this->app['ldap']->setPathScripts(LDAP_PATH_SCRIPTS);
 
-                $arguments = array(
-                    'command' => $stringCommand,
-                    'username'    => $data->fields->cu,
-                    'name'    => $data->fields->nome,
-                    'password'    => $data->fields->data_nascita,
-                    '--type'    => $type,
-                );
+                    $result =  $this->app['ldap']->addUser($type, $data->fields->cu, $data->fields->nome, $data->fields->data_nascita);
 
-                break;
-            case 'humen.change.pass':
+                    $this->app['monolog.humen']->addNotice("user inserted", [
+                        'routing_key' => $req->get('routing_key'),
+                        'data' => $data,
+                        'result' => $result,
+                    ]);
+                } catch (\Exception $e) {
+                    $this->app['monolog.humen']->addError($e->getMessage(), [
+                        'routing_key' => $req->get('routing_key'),
+                        'data' => $data,
+                    ]);
+                }
 
-                $stringCommand = 'ldap:change:password';
-
-                $arguments = array(
-                    'command' => $stringCommand,
-                    'username'    => $data->username,
-                    'old_password'    => $data->old_password,
-                    'password'    => $data->password,
-                );
-
-                break;
-            case 'humen.reset.pass':
-
-                $stringCommand = 'ldap:reset:password';
-
-                $arguments = array(
-                    'command' => $stringCommand,
-                    'username'    => $data->username,
-                    'password'    => $data->password,
-                );
+//                $stringCommand = 'ldap:user:add';
+//
+//                $type = $this->getType($data->fields);
+//
+//                $arguments = array(
+//                    'command' => $stringCommand,
+//                    'username'    => $data->fields->cu,
+//                    'name'    => $data->fields->nome,
+//                    'password'    => $data->fields->data_nascita,
+//                    '--type'    => $type,
+//                );
 
                 break;
-            case 'humen.group.remove':
+//            case 'humen.change.pass':
+//
+//                $stringCommand = 'ldap:change:password';
+//
+//                $arguments = array(
+//                    'command' => $stringCommand,
+//                    'username'    => $data->username,
+//                    'old_password'    => $data->old_password,
+//                    'password'    => $data->password,
+//                );
+//
+//                break;
+            case 'humen.password':
 
-                $stringCommand = 'ldap:user:group';
+                try {
+                    $result = $this->app['ldap']->resetPassword($data->username, $data->password);
 
-                $arguments = array(
-                    'command' => $stringCommand,
-                    'username'    => $data->username,
-                    'group'    => $data->group,
-                    '--remove'    => true,
-                );
+                    $this->app['monolog.humen']->addNotice("reset password", [
+                        'routing_key' => $req->get('routing_key'),
+                        'data' => $data,
+                        'result' => $result,
+                    ]);
+                } catch (\Exception $e) {
+                    $this->app['monolog.humen']->addError($e->getMessage(), [
+                        'routing_key' => $req->get('routing_key'),
+                        'data' => $data,
+                    ]);
+                }
 
                 break;
-            case 'humen.group.add':
+            case 'humen.groups':
+                foreach ($data->add as $group) {
+                    try {
+                        $result = $this->app['ldap']->userChangeGroup($data->username, $group, true);
 
-                $stringCommand = 'ldap:user:group';
+                        $this->app['monolog.humen']->addNotice("group added", [
+                            'routing_key' => $req->get('routing_key'),
+                            'data' => $data,
+                            'result' => $result,
+                        ]);
+                    } catch (\Exception $e) {
+                        $this->app['monolog.humen']->addError($e->getMessage(), [
+                            'routing_key' => $req->get('routing_key'),
+                            'data' => $data,
+                        ]);
+                    }
+                };
+                foreach ($data->remove as $group) {
+                    try {
+                        $this->app['ldap']->userChangeGroup($data->username, $group, true);
 
-                $arguments = array(
-                    'command' => $stringCommand,
-                    'username'    => $data->username,
-                    'group'    => $data->group,
-                );
+                        $this->app['monolog.humen']->addNotice("group subbed", [
+                            'routing_key' => $req->get('routing_key'),
+                            'data' => $data,
+                        ]);
+                    } catch (\Exception $e) {
+                        $this->app['monolog.humen']->addError($e->getMessage(), [
+                            'routing_key' => $req->get('routing_key'),
+                            'data' => $data,
+                        ]);
+                    }
+                };
 
                 break;
+//            case 'humen.group.remove':
+//
+//                $stringCommand = 'ldap:user:group';
+//
+//                $arguments = array(
+//                    'command' => $stringCommand,
+//                    'username'    => $data->username,
+//                    'group'    => $data->group,
+//                    '--remove'    => true,
+//                );
+//
+//                break;
+//            case 'humen.group.add':
+//
+//                $stringCommand = 'ldap:user:group';
+//
+//                $arguments = array(
+//                    'command' => $stringCommand,
+//                    'username'    => $data->username,
+//                    'group'    => $data->group,
+//                );
+//
+//                break;
 //            case 'humen.remove':
 //
 //                $stringCommand = 'ldap:user:remove';
@@ -121,9 +181,9 @@ class Receiver
                 return;
         }
 
-        $command = $this->app->find($stringCommand);
-        $input = new ArrayInput($arguments);
-        $returnCode = $command->run($input, $this->output);
+//        $command = $this->app->find($stringCommand);
+//        $input = new ArrayInput($arguments);
+//        $returnCode = $command->run($input, $this->output);
     }
 
     public function decodeMessage($message)
