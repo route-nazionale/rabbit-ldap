@@ -125,7 +125,7 @@ $app->post("/login", function() use ($app){
 
 $app->get("/users/{username}/groups", function($username) use ($app){
 
-    $groups = $app['ldap']->getGroups($username);
+    $groups = $app['ldap']->getUserGroups($username);
 
     return $app->json($groups);
 })
