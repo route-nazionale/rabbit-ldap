@@ -46,19 +46,23 @@ class LdapSyncGroupsOnDbCommand extends Command
             $diffToRemove = array_diff($allPosix, $groups);
             $diffToAdd = array_diff($groups, $allPosix);
 
-            foreach ($diffToAdd as $group) {
-                $this->db->insert('posix', [
-                    $this->db->quoteIdentifier("group") => $group
-                ]);
-            }
-            foreach ($diffToRemove as $group) {
-                $this->db->delete('posix', [
-                    $this->db->quoteIdentifier("group") => $group
-                ]);
+            if (count($diffToAdd)) {
+                foreach ($diffToAdd as $group) {
+                    $this->db->insert('posix', [
+                        $this->db->quoteIdentifier("group") => $group
+                    ]);
+                }
+                $this->log->addNotice('added.groups', $diffToAdd);
             }
 
-            $this->log->addNotice('added.groups', $diffToAdd);
-            $this->log->addNotice('removed.groups', $diffToRemove);
+            if (count($diffToRemove)) {
+                foreach ($diffToRemove as $group) {
+                    $this->db->delete('posix', [
+                        $this->db->quoteIdentifier("group") => $group
+                    ]);
+                }
+                $this->log->addNotice('removed.groups', $diffToRemove);
+            }
 
         } catch (\Exception $e) {
 
