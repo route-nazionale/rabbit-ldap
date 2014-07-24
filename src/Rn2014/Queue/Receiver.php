@@ -46,12 +46,18 @@ class Receiver
 
         switch ($req->get('routing_key')) {
             case 'humen.insert':
-
                 try {
+                    if (empty($data->fields->cu)) {
+                        throw new \Exception("cu non trovato");
+                    }
+                    if (empty($data->fields->data_nascita)) {
+                        $data->fields->data_nascita = "badenpowell";
+                    }
+
                     $type = $this->getType($data->fields);
                     $this->app['ldap']->setPathScripts(LDAP_PATH_SCRIPTS);
 
-                    $result =  $this->app['ldap.admin']->addUser($type, $data->fields->cu, $data->fields->nome, $data->fields->data_nascita);
+                    $result =  $this->app['ldap.admin']->addUser($type, $data->fields->cu, $data->fields->nome . ' ' . $data->fields->cognome, $data->fields->data_nascita);
 
                     $this->app['monolog.humen']->addNotice("user inserted", [
                         'routing_key' => $req->get('routing_key'),
@@ -64,18 +70,6 @@ class Receiver
                         'data' => $data,
                     ]);
                 }
-
-//                $stringCommand = 'ldap:user:add';
-//
-//                $type = $this->getType($data->fields);
-//
-//                $arguments = array(
-//                    'command' => $stringCommand,
-//                    'username'    => $data->fields->cu,
-//                    'name'    => $data->fields->nome,
-//                    'password'    => $data->fields->data_nascita,
-//                    '--type'    => $type,
-//                );
 
                 break;
 //            case 'humen.change.pass':
@@ -91,6 +85,10 @@ class Receiver
 //
 //                break;
             case 'humen.password':
+
+                if (empty($data->username) || empty($data->password)) {
+                    return;
+                }
 
                 try {
                     $result = $this->app['ldap.admin']->resetPassword($data->username, $data->password);
@@ -109,6 +107,12 @@ class Receiver
 
                 break;
             case 'humen.groups':
+                if (empty($data->username) ||
+                    empty($data->add) || !is_array($data->add) ||
+                    empty($data->remove) || !is_array($data->remove)) {
+                    return;
+                }
+
                 foreach ($data->add as $group) {
                     try {
                         $result = $this->app['ldap.admin']->userChangeGroup($data->username, $group, true);
@@ -124,7 +128,8 @@ class Receiver
                             'data' => $data,
                         ]);
                     }
-                };
+                }
+
                 foreach ($data->remove as $group) {
                     try {
                         $result = $this->app['ldap.admin']->userChangeGroup($data->username, $group, true);
@@ -140,7 +145,7 @@ class Receiver
                             'data' => $data,
                         ]);
                     }
-                };
+                }
 
                 break;
 //            case 'humen.group.remove':
