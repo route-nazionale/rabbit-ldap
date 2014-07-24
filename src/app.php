@@ -54,8 +54,8 @@ $app->register(new Providers\DoctrineServiceProvider(), [
             'host'     => MYSQL_HOST,
             'port'     => MYSQL_PORT,
             'dbname'     => MYSQL_DB_LDAP_POSIX,
-            'user'     => MYSQL_USER_LDAP,
-            'password'     => MYSQL_PASS_LDAP,
+            'user'     => MYSQL_USER_LDAP_POSIX,
+            'password'     => MYSQL_PASS_LDAP_POSIX,
             'charset'     => 'utf8',
         ],
         'aquile_randagie' => [
@@ -70,6 +70,9 @@ $app->register(new Providers\DoctrineServiceProvider(), [
     ],
 ]);
 
+/**
+ * Loggers
+ */
 $app['monolog.login.logfile'] = __DIR__ . '/../logs/auth.log';
 $app['monolog.login.level'] = Logger::INFO;
 $app['monolog.login'] = $app->share(function ($app) {
@@ -85,6 +88,16 @@ $app['monolog.humen.level'] = Logger::INFO;
 $app['monolog.humen'] = $app->share(function ($app) {
     $log = new $app['monolog.logger.class']('humen');
     $handler = new StreamHandler($app['monolog.humen.logfile'], $app['monolog.humen.level']);
+    $log->pushHandler($handler);
+
+    return $log;
+});
+
+$app['monolog.syncdb.logfile'] = __DIR__ . '/../logs/syncdb.log';
+$app['monolog.syncdb.level'] = Logger::INFO;
+$app['monolog.syncdb'] = $app->share(function ($app) {
+    $log = new $app['monolog.logger.class']('syncdb');
+    $handler = new StreamHandler($app['monolog.syncdb.logfile'], $app['monolog.syncdb.level']);
     $log->pushHandler($handler);
 
     return $log;
