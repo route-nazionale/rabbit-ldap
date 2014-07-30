@@ -79,8 +79,10 @@ $app->post("/login", function() use ($app){
         return new JsonResponse(null,401);
     }
 
+    $decodedBirthdate = false;
+    $decodedPassword = false;
+
     try {
-        $decodedPassword = false;
 
         if ($encodedPassword) {
             $decodedPassword = $app['aes.encoder']->decode($encodedPassword);
@@ -88,8 +90,6 @@ $app->post("/login", function() use ($app){
             $response = $app['auth']->attemptLogin($username, $decodedPassword, $group);
 
         } else {
-
-            $decodedBirthdate = false;
 
             if( $encodedBirthdate) {
 
