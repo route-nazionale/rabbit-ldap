@@ -129,7 +129,7 @@ class LdapCommander {
         }
 
         $params = sprintf(
-            ' "%s" "%s" "%s" ',
+            ' "%s" "%s" ',
             escapeshellarg($username),
             escapeshellarg($password)
         );
