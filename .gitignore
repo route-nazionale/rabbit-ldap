@@ -4,3 +4,7 @@ vendor
 config/
 bin
 data/test.user.js
+
+build
+buildfile.php
+rsync_exclude
