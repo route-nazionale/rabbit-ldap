@@ -91,7 +91,7 @@ class RabbitTestSendCommand extends Command
     {
         $data = json_encode($message, JSON_PRETTY_PRINT);
         $amqpMessage = new AMQPMessage($data);
-        
+
         return $amqpMessage;
     }
 }

@@ -55,7 +55,12 @@ class Receiver
                     $type = $this->getType($data->fields);
                     $this->app['ldap']->setPathScripts(LDAP_PATH_SCRIPTS);
 
-                    $result =  $this->app['ldap.admin']->addUser($type, $data->fields->cu, $data->fields->nome . ' ' . $data->fields->cognome, $data->fields->data_nascita);
+                    $result =  $this->app['ldap.admin']->addUser(
+                        $type,
+                        $data->fields->cu,
+                        $data->fields->nome . ' ' . $data->fields->cognome,
+                        $data->fields->data_nascita
+                    );
 
                     $this->app['monolog.humen']->addNotice("user inserted", [
                         'routing_key' => $req->get('routing_key'),
