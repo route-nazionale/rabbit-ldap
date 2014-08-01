@@ -119,6 +119,20 @@ class LdapRawCaller {
         return $groups;
     }
 
+    public function getUsers()
+    {
+        $users = [];
+        $filter = "(cn=*)";
+        $dnUser = "ou=Users," . $this->baseDn;
+        $result = $this->search($dnUser, $filter);
+
+        for ($i=0; $i < $result['count']; $i++) {
+            $users[] = "[{$result[$i]['uid'][0]}] \t {$result[$i]['cn'][0]}";
+        }
+
+        return $users;
+    }
+
     public function getUserGroups($username)
     {
         $groups = [];

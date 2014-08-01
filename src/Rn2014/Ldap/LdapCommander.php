@@ -97,7 +97,7 @@ class LdapCommander {
         }
 
         $params = sprintf(
-                    ' "%s" "%s" "%s" ',
+                    ' %s %s %s ',
                     escapeshellarg($username),
                     escapeshellarg($complete_name),
                     escapeshellarg($password)
@@ -129,7 +129,7 @@ class LdapCommander {
         }
 
         $params = sprintf(
-            ' "%s" "%s" ',
+            ' %s %s ',
             escapeshellarg($username),
             escapeshellarg($password)
         );
@@ -179,6 +179,15 @@ class LdapCommander {
         $this->ldap->bindAdmin();
 
         $response = $this->ldap->getUserGroups($username);
+
+        return $response;
+    }
+
+    public function getUsers()
+    {
+        $this->ldap->bindAdmin();
+
+        $response = $this->ldap->getUsers();
 
         return $response;
     }

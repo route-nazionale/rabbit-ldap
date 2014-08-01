@@ -67,6 +67,7 @@ $app['console']->add(new Commands\LdapUserAddCommand($app['ldap.admin']));
 $app['console']->add(new Commands\LdapUserGroupCommand($app['ldap.admin']));
 $app['console']->add(new Commands\LdapUserGroupsCommand($app['ldap.admin']));
 $app['console']->add(new Commands\LdapGroupsCommand($app['ldap.admin']));
+$app['console']->add(new Commands\LdapUsersCommand($app['ldap.admin']));
 $app['console']->add(new Commands\LdapSyncGroupsOnDbCommand($app['ldap.admin'],$app['dbs']['posix'], $app['monolog.syncdb']));
 
 $app['console']->run();
