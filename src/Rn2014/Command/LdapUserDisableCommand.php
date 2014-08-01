@@ -18,6 +18,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LdapUserDisableCommand extends Command
 {
+    public function __construct(LdapCommander $ldap, $name)
+    {
+        $this->ldap = $ldap;
+
+        parent::__construct($name);
+    }
+
     protected function configure()
     {
         $this
@@ -49,9 +56,7 @@ class LdapUserDisableCommand extends Command
         try {
             $ldapCaller = new LdapRawCaller($params);
 
-            $ldap = new LdapCommander($ldapCaller);
-
-            $response = $ldap->disableUser($username);
+            $response = $this->ldap->disableUser($username);
 
             $output->writeln("user [$username] disabled: " . ($response['response'] ? "OK":"KO"));
             if (!$response['response']) {

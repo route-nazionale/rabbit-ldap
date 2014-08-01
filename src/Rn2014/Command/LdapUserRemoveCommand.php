@@ -18,6 +18,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LdapUserRemoveCommand extends Command
 {
+    public function __construct(LdapCommander $ldap, $name = null)
+    {
+        $this->ldap = $ldap;
+
+        parent::__construct($name);
+    }
+
     protected function configure()
     {
         $this
@@ -55,9 +62,7 @@ class LdapUserRemoveCommand extends Command
         try {
             $ldapCaller = new LdapRawCaller($params);
 
-            $ldap = new LdapCommander($ldapCaller);
-
-            $response = $ldap->removeUser($username, $password);
+            $response = $this->ldap->removeUser($username, $password);
 
             $output->writeln("user [$username] removed: " . ($response['response'] ? "OK":"KO"));
             if (!$response['response']) {

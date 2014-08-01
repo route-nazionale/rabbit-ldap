@@ -26,6 +26,16 @@ $app->register(new ConsoleServiceProvider(), array(
     'console.project_directory' => __DIR__.''
 ));
 
+$app['monolog.import.logfile'] = __DIR__ . '/logs/import.log';
+$app['monolog.import.level'] = \Monolog\Logger::DEBUG;
+$app['monolog.import'] = $app->share(function ($app) {
+    $log = new $app['monolog.logger.class']('import');
+    $handler = new \Monolog\Handler\StreamHandler($app['monolog.import.logfile'], $app['monolog.import.level']);
+    $log->pushHandler($handler);
+
+    return $log;
+});
+
 $app['rabbit']= $app->share(function() use ($app) {
 
     $host = RABBITMQ_HOST;
@@ -51,6 +61,7 @@ $app['rabbit']= $app->share(function() use ($app) {
     return $connection;
 });
 
+$app['console']->add(new Commands\ImportUserCommand($app['ldap.admin'], $app['dbs']['aquile_randagie'], $app['monolog.import']));
 $app['console']->add(new Commands\RabbitSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitMonitorSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitTestSendCommand($app['rabbit'], $app['aes.encoder']));
@@ -62,8 +73,8 @@ $app['console']->add(new Commands\LdapTestLoginCommand($app['ldap']));
 $app['console']->add(new Commands\LdapChangePasswordCommand($app['ldap.admin']));
 $app['console']->add(new Commands\LdapResetPasswordCommand($app['ldap']));
 $app['console']->add(new Commands\LdapUserAddCommand($app['ldap.admin']));
-//$app['console']->add(new Commands\LdapUserRemoveCommand());
-//$application->add(new Commands\LdapUserDisableCommand());
+//$app['console']->add(new Commands\LdapUserRemoveCommand($app['ldap.admin']));
+//$application->add(new Commands\LdapUserDisableCommand($app['ldap.admin']));
 $app['console']->add(new Commands\LdapUserGroupCommand($app['ldap.admin']));
 $app['console']->add(new Commands\LdapUserGroupsCommand($app['ldap.admin']));
 $app['console']->add(new Commands\LdapGroupsCommand($app['ldap.admin']));
