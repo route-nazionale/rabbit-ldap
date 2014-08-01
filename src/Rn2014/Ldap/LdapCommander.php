@@ -8,14 +8,17 @@
 namespace Rn2014\Ldap;
 
 
+use Monolog\Logger;
+
 class LdapCommander {
 
     private $ldap;
     private $path_scripts = "/bin/";
 
-    public function __construct(LdapRawCaller $ldapCaller)
+    public function __construct(LdapRawCaller $ldapCaller, Logger $logger)
     {
         $this->ldap = $ldapCaller;
+        $this->logger = $logger;
     }
 
     public function setPathScripts($path)
@@ -102,10 +105,10 @@ class LdapCommander {
                     escapeshellarg($complete_name),
                     escapeshellarg($password)
         );
-
+        $this->logger->addDebug($this->path_scripts  . $script . $params );
         exec($this->path_scripts  . $script . $params, $output);
 
-        return 0 === count($output)? ['response' => true] : ['response' => false, 'errors' => $output];
+        return 3 === count($output)? ['response' => true] : ['response' => false, 'errors' => $output];
     }
 
     public function changePassword($username, $old_password, $password)
@@ -151,7 +154,7 @@ class LdapCommander {
         return $response;
     }
 
-    public function removeUser($username, $password)
+    public function removeUser($username, $password = "")
     {
         $this->ldap->bindAnonymously();
 

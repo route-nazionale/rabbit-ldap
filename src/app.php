@@ -103,6 +103,25 @@ $app['monolog.syncdb'] = $app->share(function ($app) {
     return $log;
 });
 
+$app['monolog.ldap.logfile'] = __DIR__ . '/../logs/ldap.log';
+$app['monolog.ldap.level'] = Logger::DEBUG;
+
+$app['monolog.ldap'] = $app->share(function ($app) {
+    $log = new $app['monolog.logger.class']('ldap');
+    $handler = new StreamHandler($app['monolog.ldap.logfile'], $app['monolog.ldap.level']);
+    $log->pushHandler($handler);
+
+    return $log;
+});
+
+$app['monolog.ldap.admin'] = $app->share(function ($app) {
+    $log = new $app['monolog.logger.class']('ldap.admin');
+    $handler = new StreamHandler($app['monolog.ldap.logfile'], $app['monolog.ldap.level']);
+    $log->pushHandler($handler);
+
+    return $log;
+});
+
 $app['aes.encoder'] = $app->share(function() use ($app) {
 
     if (AES_IV && AES_KEY) {
@@ -137,7 +156,7 @@ $app['ldap'] = $app->share(function() use ($app) {
     ];
 
     $ldapCaller = new LdapRawCaller($params);
-    $ldap = new LdapCommander($ldapCaller);
+    $ldap = new LdapCommander($ldapCaller, $app['monolog.ldap']);
 
     return $ldap;
 });
@@ -157,7 +176,7 @@ $app['ldap.admin'] = $app->share(function() use ($app) {
     ];
 
     $ldapCaller = new LdapRawCaller($params);
-    $ldap = new LdapCommander($ldapCaller);
+    $ldap = new LdapCommander($ldapCaller,$app['monolog.ldap.admin']);
 
     return $ldap;
 });
