@@ -178,7 +178,7 @@ class LdapRawCaller {
         $result = $this->search($dnGroup, $filter);
         $count = $result["count"];
 
-        if ($count > 1) {
+        if ($count < 1) {
             return ["response" => true];
         }
 
@@ -197,7 +197,7 @@ class LdapRawCaller {
         if (!$result)
             $this->ldapError();
 
-        $filter = '(&(cn="$group")(memberUid=$username))';
+        $filter = "(&(cn=$group)(memberUid=$username))";
 
         $result = $this->search($dn, $filter);
         $count = $result["count"];
