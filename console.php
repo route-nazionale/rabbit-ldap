@@ -62,6 +62,7 @@ $app['rabbit']= $app->share(function() use ($app) {
 });
 
 $app['console']->add(new Commands\ImportUserCommand($app['ldap.admin'], $app['dbs']['aquile_randagie'], $app['monolog.import']));
+$app['console']->add(new Commands\ImportUserChangeGroupCommand($app['ldap.admin'], $app['dbs']['aquile_randagie'], $app['monolog.import']));
 $app['console']->add(new Commands\RabbitSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitMonitorSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitTestSendCommand($app['rabbit'], $app['aes.encoder']));

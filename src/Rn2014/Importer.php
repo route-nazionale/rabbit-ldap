@@ -45,4 +45,37 @@ class Importer {
         }
         return $count;
     }
+
+    public function fixGroups(PDOStatement $users, array $groupsToAdd = [], array $groupsToRemove = [])
+    {
+        $count = 0;
+        while ($user = $users->fetch()) {
+            $cu = $user['cu'];
+
+            if ($this->dryrun) {
+                $this->output->writeln("- fix - [$cu] +[".implode(",",$groupsToAdd)."] -[".implode(",",$groupsToRemove)."]");
+                $count++;
+                continue;
+            }
+            try {
+                $add = true;
+                foreach($groupsToAdd as $group) {
+                    $result = $this->ldap->userChangeGroup($cu,$group, $add);
+                    $this->logger->addDebug("change group", ["result" => $result, 'data' => [$cu, $group, $add]]);
+                }
+
+                $add = false;
+                foreach($groupsToRemove as $group) {
+                    $result = $this->ldap->userChangeGroup($cu,$group, $add);
+                    $this->logger->addDebug("change group", ["result" => $result, 'data' => [$cu, $group, $add]]);
+                }
+
+                $count++;
+            } catch (\Exception $e) {
+                $this->output->writeln("EXCEPTION: " . $e->getMessage());
+                $this->logger->addWarning("EXCEPTION: " . $e->getMessage(), ['data' => [$cu, $group, $add], 'humen' => $user]);
+            }
+        }
+        return $count;
+    }
 }
