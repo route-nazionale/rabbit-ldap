@@ -128,8 +128,8 @@ $app->get("/users/{username}/groups", function($username) use ($app){
     $groups = $app['ldap.admin']->getUserGroups($username);
 
     return $app->json(["groups" => $groups]);
-})
-    ->before($checkJsonRequest);
+});
+//    ->before($checkJsonRequest);
 
 
 if ($app['debug']) {
