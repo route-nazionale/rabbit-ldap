@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 $checkJsonRequest = (function (Request $request) {
-    if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
+    if (0 === strpos(strtolower($request->headers->get('Content-Type')), 'application/json')) {
         $data = json_decode($request->getContent(), true);
         $request->request->replace(is_array($data) ? $data : array());
     }else
@@ -99,6 +99,17 @@ $app->post("/login", function() use ($app){
             }
         }
     } catch (\Exception $e) {
+        $context = [
+            'username' => $username,
+            'password' => $encodedPassword,
+            'birthdate' => $encodedBirthdate,
+            'result' => $response,
+            'ip' => $app['request']->getClientIps(),
+            'user_agent' => $app['request']->headers->get('User-Agent'),
+            'exception' => $e->getMessage()
+        ];
+        $app['monolog.login']->addError("login", $context);
+
         return new JsonResponse(["error" => $e->getMessage()], 500);
     }
 

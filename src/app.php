@@ -94,7 +94,7 @@ $app['monolog.humen'] = $app->share(function ($app) {
 });
 
 $app['monolog.syncdb.logfile'] = __DIR__ . '/../logs/syncdb.log';
-$app['monolog.syncdb.level'] = Logger::INFO;
+$app['monolog.syncdb.level'] = Logger::DEBUG;
 $app['monolog.syncdb'] = $app->share(function ($app) {
     $log = new $app['monolog.logger.class']('syncdb');
     $handler = new StreamHandler($app['monolog.syncdb.logfile'], $app['monolog.syncdb.level']);

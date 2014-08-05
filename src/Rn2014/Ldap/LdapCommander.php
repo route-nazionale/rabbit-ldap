@@ -108,7 +108,7 @@ class LdapCommander {
         $this->logger->addDebug($this->path_scripts  . $script . $params );
         exec($this->path_scripts  . $script . $params, $output);
 
-        return 3 === count($output)? ['response' => true] : ['response' => false, 'errors' => $output];
+        return 3 === count($output) || 1 === count($output) ? ['response' => true, 'message' => $output] : ['response' => false, 'errors' => $output];
     }
 
     public function changePassword($username, $old_password, $password)
@@ -139,16 +139,16 @@ class LdapCommander {
 
         exec($this->path_scripts  . $script . $params, $output);
 
-        return 0 === count($output)? ['response' => true] : ['response' => false, 'errors' => $output];
+        return 1 === count($output)? ['response' => true, 'message' => $output] : ['response' => false, 'errors' => $output];
     }
 
     public function userChangeGroup($username, $group, $add = true)
     {
         $this->ldap->bindAdmin();
 
-        if ($add)
-        $response = $this->ldap->userAddGroup($username, $group);
-        else {
+        if ($add) {
+            $response = $this->ldap->userAddGroup($username, $group);
+        } else {
             $response = $this->ldap->userRemoveGroup($username, $group);
         }
         return $response;
@@ -169,7 +169,7 @@ class LdapCommander {
 
     public function disableUser($username)
     {
-        return $this->ldap->changeUser($username, 0) === 0 ? ['response' => true]: ['response' => false, 'errors' => ['not modified']];
+        return $this->ldap->changeUser($username, 0) === 0 ? ['response' => true, ]: ['response' => false, 'errors' => ['not modified']];
 
     }
     public function enableUser($username)

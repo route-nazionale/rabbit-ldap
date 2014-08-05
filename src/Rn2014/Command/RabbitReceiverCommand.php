@@ -17,10 +17,11 @@ use Rn2014\Queue\Receiver;
 
 class RabbitReceiverCommand extends Command
 {
-    public function __construct($rabbit, $encoder, $name = null)
+    public function __construct($app, $rabbit, $encoder, $name = null)
     {
         $this->rabbit = $rabbit;
         $this->encoder = $encoder;
+        $this->app = $app;
 
         parent::__construct($name);
     }
@@ -41,7 +42,7 @@ class RabbitReceiverCommand extends Command
                 'consumer_tag',
                 InputArgument::OPTIONAL,
                 'Consumer tag',
-                'humen.insert'
+                'humen.*'
             );
     }
 
@@ -50,7 +51,11 @@ class RabbitReceiverCommand extends Command
         $queue_name = $input->getArgument('queue_name');
         $consumer_tag = $input->getArgument('consumer_tag');
 
-        $receiver = new Receiver($this->getApplication(), $output, $this->encoder);
+        $output->writeln("queue: {$queue_name}");
+        $output->writeln("consumer tag: {$consumer_tag}");
+        $output->writeln("_____");
+
+        $receiver = new Receiver($this->app, $output, $this->encoder);
 
         $output->writeln("connection opened");
 
@@ -62,7 +67,7 @@ class RabbitReceiverCommand extends Command
 
         $channel->basic_consume($queue_name, $consumer_tag, false, false, false, false, [$receiver, 'processMessage']);
 
-        register_shutdown_function(['Rn2014\Queue\Receiver', 'shutdown'], $channel, $this->rabbit);
+        register_shutdown_function([$receiver, 'shutdown'], $channel, $this->rabbit);
 
         // Loop as long as the channel has callbacks registered
         while(count($channel->callbacks)) {

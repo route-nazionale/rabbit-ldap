@@ -63,11 +63,12 @@ $app['rabbit']= $app->share(function() use ($app) {
 
 $app['console']->add(new Commands\ImportUserCommand($app['ldap.admin'], $app['dbs']['aquile_randagie'], $app['monolog.import']));
 $app['console']->add(new Commands\ImportUserChangeGroupCommand($app['ldap.admin'], $app['dbs']['aquile_randagie'], $app['monolog.import']));
+
 $app['console']->add(new Commands\RabbitSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitMonitorSetupCommand($app['rabbit']));
 $app['console']->add(new Commands\RabbitTestSendCommand($app['rabbit'], $app['aes.encoder']));
 $app['console']->add(new Commands\RabbitLdapSetupCommand($app['rabbit']));
-$app['console']->add(new Commands\RabbitReceiverCommand($app['rabbit'], $app['aes.encoder']));
+$app['console']->add(new Commands\RabbitReceiverCommand($app, $app['rabbit'], $app['aes.encoder']));
 
 $app['console']->add(new Commands\LdapLoginCommand($app['ldap']));
 $app['console']->add(new Commands\LdapTestLoginCommand($app['ldap']));

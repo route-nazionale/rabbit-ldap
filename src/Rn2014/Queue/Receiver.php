@@ -8,8 +8,8 @@
 namespace Rn2014\Queue;
 
 use Rn2014\AESEncoder;
-use SebastianBergmann\Exporter\Exception;
-use Symfony\Component\Console\Application;
+use \Exception;
+use Silex\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -39,12 +39,15 @@ class Receiver
 //        echo "\n--------\n";
 //        echo var_dump($req->body, true);
 //        echo "\n--------\n";
-
-        $data = $this->decodeMessage($req->body);
+        $this->app['monolog.humen']->addDebug($req->get('routing_key'), ["message" => $req->body]);
 
         try {
             switch ($req->get('routing_key')) {
                 case 'humen.insert':
+
+                    $decodedMessage = $this->decodeMessage($req->body, false);
+                    $data = $decodedMessage[0];
+
                     if (empty($data->fields->cu)) {
                         throw new \Exception("cu non trovato");
                     }
@@ -53,7 +56,7 @@ class Receiver
                     }
 
                     $type = $this->getType($data->fields);
-                    $this->app['ldap']->setPathScripts(LDAP_PATH_SCRIPTS);
+                    $this->app['ldap.admin']->setPathScripts(LDAP_PATH_SCRIPTS);
 
                     $result =  $this->app['ldap.admin']->addUser(
                         $type,
@@ -71,12 +74,15 @@ class Receiver
                     break;
                 case 'humen.password':
 
+                    $data = $this->decodeMessage($req->body);
+
                     if (empty($data->username) || empty($data->password)) {
                         throw new \Exception("cu o pass non trovata");
                     }
 
-                    $result = $this->app['ldap.admin']->resetPassword($data->username, $data->password);
+                    $this->app['ldap.admin']->setPathScripts(LDAP_PATH_SCRIPTS);
 
+                    $result = $this->app['ldap.admin']->resetPassword($data->username, $data->password);
                     $this->app['monolog.humen']->addNotice("reset password", [
                             'routing_key' => $req->get('routing_key'),
                             'data' => $data,
@@ -86,9 +92,11 @@ class Receiver
                     break;
                 case 'humen.groups':
 
+                    $data = $this->decodeMessage($req->body, false);
+
                     if (empty($data->username) ||
-                            empty($data->add) || !is_array($data->add) ||
-                            empty($data->remove) || !is_array($data->remove)) {
+                            !is_array($data->add) ||
+                            !is_array($data->remove)) {
                         throw new \Exception("username o gruppi add/remove non corretti");
                     }
 
@@ -104,7 +112,7 @@ class Receiver
                     }
 
                     foreach ($data->remove as $group) {
-                        $result = $this->app['ldap.admin']->userChangeGroup($data->username, $group, true);
+                        $result = $this->app['ldap.admin']->userChangeGroup($data->username, $group, false);
 
                         $this->app['monolog.humen']->addNotice("group subbed", [
                                 'routing_key' => $req->get('routing_key'),
@@ -162,9 +170,11 @@ class Receiver
                 //                break;
 
                 default:
+
+                    $req->delivery_info['channel']->basic_nack($req->delivery_info['delivery_tag']);
                     $this->app['monolog.humen']->addError('routing_key non riconosciuta', [
                         'routing_key' => $req->get('routing_key'),
-                        'data' => $data,
+                        'message' => $req->body,
                     ]);
                     return;
             }
@@ -172,27 +182,33 @@ class Receiver
             $req->delivery_info['channel']->basic_ack($req->delivery_info['delivery_tag']);
 
         } catch (\Exception $e) {
+            $req->delivery_info['channel']->basic_nack($req->delivery_info['delivery_tag']);
             $this->app['monolog.humen']->addError($e->getMessage(), [
                 'routing_key' => $req->get('routing_key'),
-                'data' => $data,
+                'message' => $req->body,
             ]);
         }
     }
 
-    public function decodeMessage($message)
+    public function decodeMessage($message, $decrypt = true)
     {
         $message = json_decode($message);
 
+        if (!$decrypt ) {
+            return $message;
+        }
         foreach ($message as $field => $value) {
-            if (in_array(self::$codificatedFields, $field)) {
+            if (in_array($field, self::$codificatedFields)) {
                 $message->$field = $this->aesEncoder->decode($value);
             }
         }
         return $message;
     }
 
-    public static function shutdown($channel, $conn)
+    public function shutdown($channel, $conn)
     {
+        $this->app['monolog.humen']->addEmergency("shutdown", []);
+
         $channel->close();
         $conn->close();
     }
